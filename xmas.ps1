@@ -59,12 +59,12 @@ $logT=$top + 3 + $logi
 #write-c -word "------------------------------" -wrColor DarkCyan -Color Cyan
 if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
 [console]::setcursorposition($logL,$logT)
-write-c -word "Starting program snow" -wrColor Red -Color Cyan
+write-c -word "Starting program : Altitude365 Snow" -wrColor Red -Color Cyan
 if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
 
 
 [console]::setcursorposition($logL,$logT)
-write-c -word "Write window" -wrColor Red -Color Cyan
+write-c -word "Write window corners" -wrColor Red -Color Cyan
 if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
 
 [console]::setcursorposition($left,$wt)
@@ -89,7 +89,7 @@ sleep -Milliseconds 200
 
 [console]::SetWindowPosition(0,$wt)
 [console]::setcursorposition($logL,$logT)
-write-c -word "Set windows position" -wrColor Red -Color Cyan
+write-c -word "Set window position" -wrColor Red -Color Cyan
 if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
 
 [console]::setcursorposition($logL,$logT)
