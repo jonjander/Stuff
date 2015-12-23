@@ -119,15 +119,15 @@ write-host ".oooooooooo-``oooooooooo:  /d/::/ho .N.     :m    m/   -m``   ys   `
 write-host "  -:///////.``////////-``  ``s.    ``s.``soooo`` -s    s-   .o    ``/oo+o-  ``soo++:``  ``yooo+``               "
 }
 Sleep 10
-for ($y = $top; $y -lt ($bottom + 1); $y++)
-{ 
-    for ($x = $left; $x -lt ($right + 1); $x++)
-    { 
-        [console]::setcursorposition($x,$y)
-        write-host " " -NoNewline
-    }
-}
-[console]::SetWindowPosition(0,$wt)
+#for ($y = $top; $y -lt ($bottom + 1); $y++)
+#{ 
+#    for ($x = $left; $x -lt ($right + 1); $x++)
+#    { 
+#        [console]::setcursorposition($x,$y)
+#        write-host " " -NoNewline
+#    }
+#}
+#[console]::SetWindowPosition(0,$wt)
 
 function createNewSnowflage {
     $randomStart=Get-Random -Minimum $left -Maximum $right
