@@ -145,8 +145,9 @@ function testFlage {
     $r | Add-Member -MemberType NoteProperty -Name X -Value $randomStart
     $r | Add-Member -MemberType NoteProperty -Name y -Value $top
     $r | Add-Member -MemberType NoteProperty -Name Stoped -Value $false
-    $r | Add-Member -MemberType NoteProperty -Name Density -Value 1
-    $r | Add-Member -MemberType NoteProperty -Name Skin -Value $(@("☼","·","*","•","*"))[(get-random -min 0 -max 5)]
+    $dsr=(get-random -min 0 -max 5)
+    $r | Add-Member -MemberType NoteProperty -Name Density -Value ($dsr + 1)
+    $r | Add-Member -MemberType NoteProperty -Name Skin -Value $(@("·","•","*","☼","*"))[$dsr]
     return $r
 }
 
@@ -227,7 +228,7 @@ $snowFlages.where({$psitem.Stoped -eq $false}).where({
     }
     $stFlag=$snowFlages.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)}) 
     if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
-        if (($stFlag.Density | measure -Sum).Sum -gt 10) {
+        if (($stFlag.Density | measure -Sum).Sum -gt 16) {
             #Add layer
             $newx=$newx
             $newy=$newy-1
@@ -236,10 +237,10 @@ $snowFlages.where({$psitem.Stoped -eq $false}).where({
         } else {
             switch (($stFlag.Density | measure -Sum).Sum)
             {
-                {$_ -le 3} {$nsk = "▄"}
-                {$_ -gt 3 -and $_ -le 7} {$nsk = "░"}
-                {$_ -gt 7 -and $_ -le 9} {$nsk = "▓"}
-                {$_ -gt 9} {$nsk = "█"}
+                {$_ -le 5} {$nsk = "▄"}
+                {$_ -gt 5 -and $_ -le 10} {$nsk = "░"}
+                {$_ -gt 10 -and $_ -le 14} {$nsk = "▓"}
+                {$_ -gt 14} {$nsk = "█"}
             }
             $psitem.Skin=$nsk
             #merge
