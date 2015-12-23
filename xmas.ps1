@@ -1,4 +1,5 @@
-﻿function write-c {
+﻿#
+function write-c {
     param(
         $word="Test",
         [ValidateSet("Black","Blue","Cyan","DarkBlue","DarkCyan","DarkGray","DarkGreen","DarkMagenta","DarkRed","DarkYellow","Gray","Green","Magenta","Red","White","Yellow")]$wrColor="Cyan",
@@ -23,6 +24,7 @@
     }
     write-host ""
 }
+
 $ct=[console]::CursorTop
 $cl=[console]::CursorLeft
 $wt = [console]::WindowTop
@@ -30,46 +32,67 @@ $wl=[console]::WindowLeft
 $wh=[console]::WindowHeight
 $ww=[console]::WindowWidth
 [console]::CursorVisible = $false
+
 prompt ""
+
+#write-host $ct
+#write-host $cl
+#write-host $wt
+#write-host $wl
+#write-host $wh
+#write-host $ww
+
 $left=0
 $right=($ww - 1)
 $top=$wt
 $bottom=($wt + $wh - 1)
+
 $logi=0
 $logL=$left + 1
 $logT=$top + 3 + $logi
+
 [console]::setcursorposition($logL,$logT)
+#write-c -word "------------------------------" -wrColor DarkCyan -Color Cyan
 if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
 [console]::setcursorposition($logL,$logT)
 write-c -word "Starting program snow" -wrColor DarkCyan -Color Cyan
 if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
+
+
 [console]::setcursorposition($logL,$logT)
 write-c -word "Write window" -wrColor DarkCyan -Color Cyan
 if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
+
 [console]::setcursorposition($left,$wt)
 write-host "o" -ForegroundColor Red -NoNewline
 [console]::SetWindowPosition(0,$wt)
 sleep -Milliseconds 200
+
 [console]::setcursorposition($right,$wt)
 write-host "o" -ForegroundColor Red -NoNewline
 [console]::SetWindowPosition(0,$wt)
 sleep -Milliseconds 200
+
 [console]::setcursorposition($right,$bottom)
 write-host "o" -ForegroundColor Red -NoNewline
 [console]::SetWindowPosition(0,$wt)
 sleep -Milliseconds 200
+
 [console]::setcursorposition($left,$bottom)
 write-host "o" -ForegroundColor Red -NoNewline
 [console]::SetWindowPosition(0,$wt)
 sleep -Milliseconds 200
+
 [console]::SetWindowPosition(0,$wt)
 [console]::setcursorposition($logL,$logT)
 write-c -word "Set windows posistion" -wrColor DarkCyan -Color Cyan
 if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
+
 [console]::setcursorposition($logL,$logT)
 write-c -word "Clear screen" -wrColor DarkCyan -Color Cyan
 if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
 sleep -Milliseconds 200
+
 for ($x = $left; $x -lt ($right + 1); $x++)
 { 
     for ($y = $top; $y -lt ($bottom + 1); $y++)
@@ -79,6 +102,7 @@ for ($x = $left; $x -lt ($right + 1); $x++)
     }
 }
 [console]::SetWindowPosition(0,$wt)
+
 $f="      ``/oooooooo+.                  ``    ````````````  ``  ````````````            ``````       `````````` ..:. :..`` /..  "
 [console]::setcursorposition($left + 3,$top + 3)
 if ($f.Length -gt $right) {  
@@ -104,9 +128,12 @@ for ($y = $top; $y -lt ($bottom + 1); $y++)
     }
 }
 [console]::SetWindowPosition(0,$wt)
+
 function createNewSnowflage {
     $randomStart=Get-Random -Minimum $left -Maximum $right
+
 }
+
 function testFlage {
     $randomStart=Get-Random -Minimum $left -Maximum $right
     $r=New-Object System.Object
@@ -118,6 +145,7 @@ function testFlage {
     $r | Add-Member -MemberType NoteProperty -Name Skin -Value "*"
     return $r
 }
+
 [object[]]$snowFlages=testFlage
 $snowFlages+=testFlage
 $snowFlages+=testFlage
@@ -125,14 +153,29 @@ $snowFlages+=testFlage
 $snowFlages+=testFlage
 $snowFlages+=testFlage
 $snowFlages+=testFlage
+#$snowFlages+=testFlage
+#$snowFlages+=testFlage
+#$snowFlages+=testFlage
+
 Sleep 4
 while (1) {
+
 $snowFlages+=testFlage
+#$snowFlages+=testFlage
+
 $snowFlages.where({$psitem.Stoped -eq $false}).ForEach({
     sleep -Milliseconds 10
     $id=$psitem.id
     $oldx=$psitem.x
     $oldy=$psitem.y
+    #[console]::setcursorposition($left,$top)
+    #write-host "Old "
+    #write-host "x " $oldx
+    #Write-Host "y " $oldy
+    #write-host "t " $top
+    #write-host "l " $left
+    #write-host "r "  $right
+    #write-host "b "  $bottom
     $out=$false
     $down=$false
     $dir=Get-Random -Minimum 1 -Maximum 3
@@ -154,6 +197,11 @@ $snowFlages.where({$psitem.Stoped -eq $false}).ForEach({
         }
     }
     [console]::setcursorposition($left,$top + 8)
+    #write-host "new "
+    #write-host "x " $newx
+    #Write-Host "y " $newy
+    #sleep -Milliseconds 50
+    ##Within boundarys
     if ($newx -lt $left) { # Left
         $out=$true
     }
@@ -189,23 +237,38 @@ $snowFlages.where({$psitem.Stoped -eq $false}).ForEach({
 
     if ($down) {
         $psitem.Stoped = $true
+        #$psitem.Skin = "▄"
+        #▄░▓█
+
+        #[console]::setcursorposition($logL,$logT)
+        #write-c -word "Down!" -wrColor DarkCyan -Color Cyan
+        #if ($logi -lt ($bottom -3)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
+        #WriteStopped
         [console]::setcursorposition($newx,$newy)
         write-host ("{0}" -f $psitem.Skin) -NoNewline -ForegroundColor White
 
     }
 
     if ($out -eq $false) {
+        #remove old
         [console]::setcursorposition($oldx,$oldy)
         write-host " " -NoNewline
+        #writeNew
         [console]::setcursorposition($newx,$newy)
         write-host ("{0}" -f $psitem.Skin) -NoNewline -ForegroundColor White
+        #write-host ("*" -f $psitem.Skin) -NoNewline -ForegroundColor White
+        #Update flage posistion
         $psitem.x=$newx
         $psitem.y=$newy
     } else {
+        #remove old
         [console]::setcursorposition($oldx,$oldy)
         write-host " "
+        #write-host "X" -NoNewline -ForegroundColor Red
         $snowFlages=$snowFlages.Where({$PSItem.id -ne $id})
         [console]::setcursorposition($logL,$logT)
+        #write-c -word "Out!" -wrColor DarkCyan -Color Cyan
+        #sleep 1
         if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
     }
 
