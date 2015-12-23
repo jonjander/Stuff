@@ -151,24 +151,24 @@ function testFlage {
     return $r
 }
 
-[object[]]$snowFlages=testFlage
-$snowFlages+=testFlage
-$snowFlages+=testFlage
-$snowFlages+=testFlage
-$snowFlages+=testFlage
-$snowFlages+=testFlage
-$snowFlages+=testFlage
-#$snowFlages+=testFlage
-#$snowFlages+=testFlage
-#$snowFlages+=testFlage
+[object[]]$snowflakes =testFlage
+$snowflakes +=testFlage
+$snowflakes +=testFlage
+$snowflakes +=testFlage
+$snowflakes +=testFlage
+$snowflakes +=testFlage
+$snowflakes +=testFlage
+#$snowflakes +=testFlage
+#$snowflakes +=testFlage
+#$snowflakes +=testFlage
 
 Sleep 4
 while (1) {
 [console]::SetWindowPosition(0,$wt)
-$snowFlages+=testFlage
-#$snowFlages+=testFlage
+$snowflakes +=testFlage
+#$snowflakes +=testFlage
 
-$snowFlages.where({$psitem.Stoped -eq $false}).where({
+$snowflakes .where({$psitem.Stoped -eq $false}).where({
     $gr=Get-Random -Minimum 1 -Maximum 10
     if ($gr -lt 6) {
         $gr2=Get-Random -Minimum 1 -Maximum 6
@@ -216,7 +216,7 @@ $snowFlages.where({$psitem.Stoped -eq $false}).where({
         write-host "new " -BackgroundColor White -ForegroundColor Black
         write-host "x " $newx -BackgroundColor White -ForegroundColor Black
         Write-Host "y " $newy -BackgroundColor White -ForegroundColor Black
-        write-host "Number of objects " $snowFlages.Count -BackgroundColor White -ForegroundColor Black
+        write-host "Number of objects " $snowflakes .Count -BackgroundColor White -ForegroundColor Black
         sleep -Milliseconds 50
     }
     ##Within boundarys
@@ -231,7 +231,7 @@ $snowFlages.where({$psitem.Stoped -eq $false}).where({
         $newy=$PSItem.y
         $down=$true
     }
-    $stFlag=$snowFlages.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)}) 
+    $stFlag=$snowflakes .where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)}) 
     if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
         if (($stFlag.Density | measure -Sum).Sum -gt 16) {
             #Add layer
@@ -286,7 +286,7 @@ $snowFlages.where({$psitem.Stoped -eq $false}).where({
             sleep -Milliseconds 200
             write-host "X" -NoNewline -ForegroundColor Red
         }
-        $snowFlages=$snowFlages.Where({$PSItem.id -ne $id})
+        $snowflakes =$snowflakes .Where({$PSItem.id -ne $id})
         [console]::setcursorposition($logL,$logT)
         #write-c -word "Out!" -wrColor DarkCyan -Color Cyan
         #sleep 1
