@@ -146,7 +146,7 @@ function testFlage {
     $r | Add-Member -MemberType NoteProperty -Name y -Value $top
     $r | Add-Member -MemberType NoteProperty -Name Stoped -Value $false
     $r | Add-Member -MemberType NoteProperty -Name Density -Value 1
-    $r | Add-Member -MemberType NoteProperty -Name Skin -Value "*"
+    $r | Add-Member -MemberType NoteProperty -Name Skin -Value $(@("☼","·","*","*"))[(get-random -min 0 -max 4)]
     return $r
 }
 
