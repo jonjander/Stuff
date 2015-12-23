@@ -237,14 +237,25 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
     function hitCalc {
         $stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
         if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
-            $newy=$newy-1
-            Write-Host "MGL!!"
-            hitCalc
+            if (($stFlag.Density | measure -Sum).Sum -gt 16) {
+                $newy=$newy-1
+                Write-Host "MGL!!"
+                hitCalc
+            } else {
+                #merge
+            }
         } else {
             #toplevel
         }
     }
+
     $stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)}) 
+    if ($stFlag.Count -gt 0) {
+        if (($stFlag.Density | measure -Sum).Sum -gt 16) {
+            hitCalc
+        }
+    }
+    
     if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
         if (($stFlag.Density | measure -Sum).Sum -gt 16) {
             #Add layer
