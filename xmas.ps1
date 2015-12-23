@@ -1,4 +1,6 @@
-﻿#
+﻿param(
+[switch]$Debug
+)
 function write-c {
     param(
         $word="Test",
@@ -35,12 +37,14 @@ $ww=[console]::WindowWidth
 
 prompt ""
 
-#write-host $ct
-#write-host $cl
-#write-host $wt
-#write-host $wl
-#write-host $wh
-#write-host $ww
+if ($Debug) {
+    write-host $ct
+    write-host $cl
+    write-host $wt
+    write-host $wl
+    write-host $wh
+    write-host $ww
+}
 
 $left=0
 $right=($ww - 1)
@@ -171,14 +175,16 @@ $snowFlages.where({$psitem.Stoped -eq $false}).where({
     $id=$psitem.id
     $oldx=$psitem.x
     $oldy=$psitem.y
-    #[console]::setcursorposition($left,$top)
-    #write-host "Old "
-    #write-host "x " $oldx
-    #Write-Host "y " $oldy
-    #write-host "t " $top
-    #write-host "l " $left
-    #write-host "r "  $right
-    #write-host "b "  $bottom
+    if ($Debug) {
+        [console]::setcursorposition($left,$top)
+        write-host "Old " -BackgroundColor White -ForegroundColor Black
+        write-host "x " $oldx -BackgroundColor White -ForegroundColor Black
+        Write-Host "y " $oldy -BackgroundColor White -ForegroundColor Black
+        write-host "t " $top -BackgroundColor White -ForegroundColor Black
+        write-host "l " $left -BackgroundColor White -ForegroundColor Black
+        write-host "r "  $right -BackgroundColor White -ForegroundColor Black
+        write-host "b "  $bottom -BackgroundColor White -ForegroundColor Black
+    }
     $out=$false
     $down=$false
     $dir=Get-Random -Minimum 1 -Maximum 3
@@ -199,11 +205,14 @@ $snowFlages.where({$psitem.Stoped -eq $false}).where({
             $newy=$oldy + 1
         }
     }
-    [console]::setcursorposition($left,$top + 8)
-    #write-host "new "
-    #write-host "x " $newx
-    #Write-Host "y " $newy
-    #sleep -Milliseconds 50
+    if ($Debug) {
+        [console]::setcursorposition($left,$top + 8)
+        write-host "new " -BackgroundColor White -ForegroundColor Black
+        write-host "x " $newx -BackgroundColor White -ForegroundColor Black
+        Write-Host "y " $newy -BackgroundColor White -ForegroundColor Black
+        write-host "Number of objects " $snowFlages.Count -BackgroundColor White -ForegroundColor Black
+        sleep -Milliseconds 50
+    }
     ##Within boundarys
     if ($newx -lt $left) { # Left
         $out=$true
@@ -267,7 +276,10 @@ $snowFlages.where({$psitem.Stoped -eq $false}).where({
         #remove old
         [console]::setcursorposition($oldx,$oldy)
         write-host " "
-        #write-host "X" -NoNewline -ForegroundColor Red
+        if ($Debug) {
+            sleep -Milliseconds 200
+            write-host "X" -NoNewline -ForegroundColor Red
+        }
         $snowFlages=$snowFlages.Where({$PSItem.id -ne $id})
         [console]::setcursorposition($logL,$logT)
         #write-c -word "Out!" -wrColor DarkCyan -Color Cyan
