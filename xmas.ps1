@@ -225,14 +225,14 @@ $snowFlages.where({$psitem.Stoped -eq $false}).where({
         $newy=$PSItem.y
         $down=$true
     }
-    $stFlag=$snowFlages.where({$psitem.x -eq $newx -and $psitem.y -eq $newy -and $psitem.Stoped -eq $true}) 
+    $stFlag=$snowFlages.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)}) 
     if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
         if (($stFlag.Density | measure -Sum).Sum -gt 10) {
             #Add layer
             $newx=$newx
             $newy=$newy-1
             $down=$true
-            $psitem.Skin = "▄"
+            #$psitem.Skin = "▄"
         } else {
             switch (($stFlag.Density | measure -Sum).Sum)
             {
@@ -284,7 +284,7 @@ $snowFlages.where({$psitem.Stoped -eq $false}).where({
         [console]::setcursorposition($logL,$logT)
         #write-c -word "Out!" -wrColor DarkCyan -Color Cyan
         #sleep 1
-        if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
+        #if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
     }
 
 })
