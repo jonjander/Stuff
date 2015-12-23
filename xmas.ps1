@@ -163,7 +163,10 @@ while (1) {
 $snowFlages+=testFlage
 #$snowFlages+=testFlage
 
-$snowFlages.where({$psitem.Stoped -eq $false}).ForEach({
+$snowFlages.where({$psitem.Stoped -eq $false}).where({
+    $gr=Get-Random -Minimum 1 -Maximum 10
+    if ($gr -eq 1) {$false} else {$true} #Slowdown random
+    }).ForEach({
     sleep -Milliseconds 10
     $id=$psitem.id
     $oldx=$psitem.x
