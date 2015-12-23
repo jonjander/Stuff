@@ -170,7 +170,12 @@ $snowFlages+=testFlage
 
 $snowFlages.where({$psitem.Stoped -eq $false}).where({
     $gr=Get-Random -Minimum 1 -Maximum 10
-    if ($gr -eq 1) {$false} else {$true} #Slowdown random
+    if ($gr -lt 6) {
+        $gr2=Get-Random -Minimum 1 -Maximum 6
+            if ($gr2 -le $psitem.Density) {$true} else {$false} #Slowdown random
+        } else {
+            $true
+        } #Slowdown random
     }).ForEach({
     sleep -Milliseconds 10
     $id=$psitem.id
