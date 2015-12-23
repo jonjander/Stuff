@@ -127,7 +127,7 @@ Sleep 10
 #        write-host " " -NoNewline
 #    }
 #}
-#[console]::SetWindowPosition(0,$wt)
+[console]::SetWindowPosition(0,$wt)
 
 function createNewSnowflage {
     $randomStart=Get-Random -Minimum $left -Maximum $right
