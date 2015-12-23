@@ -1,6 +1,7 @@
 ﻿param(
 [switch]$Debug
 )
+#Todo melt snow and distribute left and right
 function write-c {
     param(
         $word="Test",
@@ -177,7 +178,9 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             $true
         } #Slowdown random
     }).ForEach({
-    sleep -Milliseconds 10
+    if (-not $Debug) {
+        sleep -Milliseconds 10
+    }
     $id=$psitem.id
     $oldx=$psitem.x
     $oldy=$psitem.y
@@ -231,14 +234,32 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         $newy=$PSItem.y
         $down=$true
     }
+    function hitCalc {
+        $stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
+        if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
+            $newy=$newy-1
+            Write-Host "MGL!!"
+            hitCalc
+        } else {
+            #toplevel
+        }
+    }
     $stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)}) 
     if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
         if (($stFlag.Density | measure -Sum).Sum -gt 16) {
             #Add layer
             $newx=$newx
             $newy=$newy-1
+            
+            if ($stFlag.Count -gt 0) {
             $down=$true
             #$psitem.Skin = "▄"
+        } 
+    }
+    $stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
+    if ($stFlag.Count -gt 0) {
+        if (($stFlag.Density | measure -Sum).Sum -gt 16) {
+
         } else {
             switch (($stFlag.Density | measure -Sum).Sum)
             {
@@ -250,6 +271,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             $psitem.Skin=$nsk
             #merge
             $down=$true
+            }
         }
     }
 
