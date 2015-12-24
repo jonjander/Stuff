@@ -123,7 +123,7 @@ write-host "/ooooooo+oo-``oo+oooooooo``  oh-.yy  .N.     :m    m/   -m``   m/   
 write-host ".oooooooooo-``oooooooooo:  /d/::/ho .N.     :m    m/   -m``   ys   ``d: ``m.   :h/ ``M``                   "
 write-host "  -:///////.``////////-``  ``s.    ``s.``soooo`` -s    s-   .o    ``/oo+o-  ``soo++:``  ``yooo+``               "
 }
-Sleep 10
+Sleep 8
 #for ($y = $top; $y -lt ($bottom + 1); $y++)
 #{ 
 #    for ($x = $left; $x -lt ($right + 1); $x++)
@@ -234,57 +234,114 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         $newy=$PSItem.y
         $down=$true
     }
-    function hitCalc {
+    function hitCalc { #fix this. perhaps a do unitl # Nu är det nån jävla flyta på olja effekt.
+    param (
+        $rrr
+    )
+        $newy = $rrr.newy
+        $newx = $rrr.newx
+        $psitem = $rrr.psitem
+        $down = $rrr.down
+
+        $rrr=new-object System.Object
         $stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
         if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
-            if (($stFlag.Density | measure -Sum).Sum -gt 16) {
+            if (($stFlag.Density | measure -Sum).Sum -gt 19) {
+                #Write-Host "MGL!!" $newy -ForegroundColor Blue
+                #[console]::setcursorposition($left,$top + 8)
+                #write-host "Loop newy" $newy (Get-Date) -BackgroundColor White -ForegroundColor Black
                 $newy=$newy-1
-                Write-Host "MGL!!"
-                hitCalc
+                #$newx=$newx
+                #Write-Host "MGL!!" $newy -ForegroundColor Green
+                #sleep 2
+                $rrr | Add-Member -MemberType NoteProperty -Name newy -Value $newy -Force
+                $rrr | Add-Member -MemberType NoteProperty -Name newx -Value $newx -Force
+                $rrr | Add-Member -MemberType NoteProperty -Name psitem -Value $psitem -Force
+                $rrr | Add-Member -MemberType NoteProperty -Name down -Value $down -Force
+                $rrr = hitCalc -rrr $rrr  
+                $newx = $rrr.newx
+                $newy = $rrr.newy
+                $psitem = $rrr.psitem
+                $down = $rrr.down    
             } else {
                 #merge
+                #[console]::setcursorposition($left,$top + 8)
+                #write-host "merge " -BackgroundColor White -ForegroundColor Black
+                switch (($stFlag.Density | measure -Sum).Sum)
+                {
+                    {$_ -le 5} {$nsk = "▄"}
+                    {$_ -gt 5 -and $_ -le 10} {$nsk = "░"}
+                    {$_ -gt 10 -and $_ -le 14} {$nsk = "▓"}
+                    {$_ -gt 14} {$nsk = "█"}
+                }
+                $psitem.Skin=$nsk #Behöver säkert returna denna också för att få rätt skin.
+                $down=$true #säkert return down. Många variabler kommer inter ur funkltionen.
             }
         } else {
             #toplevel
+            $down=$true
+            #if ($down -eq $true) {sleep 2;Write-Host "DOWN" -ForegroundColor Green}
+            #[console]::setcursorposition($left,$top + 2)
+            #write-host "TTLLLLLLLLLLLLLLLLLLLLLL" $newy (Get-Date) -BackgroundColor White -ForegroundColor Black
         }
+        $rrr | Add-Member -MemberType NoteProperty -Name newy -Value $newy -Force
+        $rrr | Add-Member -MemberType NoteProperty -Name newx -Value $newx -Force
+        $rrr | Add-Member -MemberType NoteProperty -Name psitem -Value $psitem -Force
+        $rrr | Add-Member -MemberType NoteProperty -Name down -Value $down -Force
+        #[console]::setcursorposition($left,$top + 5)
+        #write-host "Exit" $newy (Get-Date) -BackgroundColor White -ForegroundColor Black
+        #write-host "Exit" $down (Get-Date) -BackgroundColor White -ForegroundColor Black
+        #write-host "Exit" $psitem.Skin (Get-Date) -BackgroundColor White -ForegroundColor Black
+        return $rrr
     }
 
     $stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)}) 
     if ($stFlag.Count -gt 0) {
-        if (($stFlag.Density | measure -Sum).Sum -gt 16) {
-            hitCalc
-        }
+        #if (($stFlag.Density | measure -Sum).Sum -gt 16) {
+            $rrr=new-object System.Object
+            $rrr | Add-Member -MemberType NoteProperty -Name newy -Value $newy -Force
+            $rrr | Add-Member -MemberType NoteProperty -Name newx -Value $newx -Force
+            $rrr | Add-Member -MemberType NoteProperty -Name psitem -Value $psitem -Force
+            $rrr | Add-Member -MemberType NoteProperty -Name down -Value $down -Force
+            $rrr=hitCalc -rrr $rrr
+            $newx = $rrr.newx
+            $newy = $rrr.newy
+            $psitem = $rrr.psitem
+            $down = $rrr.down
+            #[console]::setcursorposition($left,$top + 8)
+            #write-host "Exit" $newy (Get-Date) -BackgroundColor White -ForegroundColor red
+            #write-host "Exit" $down (Get-Date) -BackgroundColor White -ForegroundColor red
+            #write-host "Exit" $psitem.Skin (Get-Date) -BackgroundColor White -ForegroundColor red
+            #sleep 1
+        #}
     }
     
-    if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
-        if (($stFlag.Density | measure -Sum).Sum -gt 16) {
-            #Add layer
-            $newx=$newx
-            $newy=$newy-1
-            
-            if ($stFlag.Count -gt 0) {
-            $down=$true
-            #$psitem.Skin = "▄"
-        } 
-    }
-    $stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
-    if ($stFlag.Count -gt 0) {
-        if (($stFlag.Density | measure -Sum).Sum -gt 16) {
-
-        } else {
-            switch (($stFlag.Density | measure -Sum).Sum)
-            {
-                {$_ -le 5} {$nsk = "▄"}
-                {$_ -gt 5 -and $_ -le 10} {$nsk = "░"}
-                {$_ -gt 10 -and $_ -le 14} {$nsk = "▓"}
-                {$_ -gt 14} {$nsk = "█"}
-            }
-            $psitem.Skin=$nsk
-            #merge
-            $down=$true
-            }
-        }
-    }
+    #if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
+    #    if (($stFlag.Density | measure -Sum).Sum -gt 16) {
+    #        #Add layer
+    #        $newx=$newx
+    #        $newy=$newy-1
+    #        $down=$true
+    #
+    #}
+    #$stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
+    #if ($stFlag.Count -gt 0) {
+    #    if (($stFlag.Density | measure -Sum).Sum -gt 16) {
+    #
+    #    } else {
+    #        switch (($stFlag.Density | measure -Sum).Sum)
+    #        {
+    #            {$_ -le 5} {$nsk = "▄"}
+    #            {$_ -gt 5 -and $_ -le 10} {$nsk = "░"}
+    #            {$_ -gt 10 -and $_ -le 14} {$nsk = "▓"}
+    #            {$_ -gt 14} {$nsk = "█"}
+    #        }
+    #        $psitem.Skin=$nsk
+    #        #merge
+    #        $down=$true
+    #        }
+    #    }
+    #}
 
     if ($down) {
         $psitem.Stoped = $true
