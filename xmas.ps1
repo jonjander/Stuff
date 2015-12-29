@@ -384,4 +384,104 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
     }
 
 })
+    #dont run every time
+    
+    $cmd = {
+    param([object[]]$snowflakes)
+    
+        [object[]]$move=$snowflakes.where({$psitem.Stoped -eq $true}).where({
+            $snowflakesChange=New-Object System.Object
+            $xu=$PSItem.x
+            $yu=$PSItem.y
+            $tempID=$PSItem.ID
+            #$range=-1..1
+            if (($snowflakes.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
+                if (($snowflakes.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
+                    if (($snowflakes.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
+                        if (($snowflakes.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
+                            if (($snowflakes.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
+                                if (($snowflakes.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
+                                    (($snowflakes.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -gt 16) -and
+                                    (($snowflakes.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -gt 16)
+                                } else { $false }
+                            } else { $false }
+                        } else { $false }
+                    } else { $false }
+                } else { $false }
+            } else { $false }
+            
+
+        }) | select * -First 1
+        $move.foreach({
+            if ((Get-Random -Minimum 1 -Maximum 3) -eq 2) {
+                $PSItem.x++
+            } else {
+                $PSItem.x++
+            }
+            $PSItem.Stoped = $false
+
+            $snowflakesChange | Add-Member -MemberType NoteProperty -Name ID -value $tempID
+            $snowflakesChange | Add-Member -MemberType NoteProperty -Name x -Value $PSItem.x
+            $snowflakesChange | Add-Member -MemberType NoteProperty -Name y -Value $PSItem.y
+
+            Write-Output $snowflakesChange
+            #$xu=$PSItem.x
+            #$yu=$PSItem.y
+            #[console]::setcursorposition($xu,$yu)
+            #write-host "O" -ForegroundColor Red
+            #sleep 4
+
+        #    $snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
+        # Add support för melt sideways
+        #
+        })
+    } #cmd end
+    #$cmd = {
+    #  param($a, $b)
+    #  Write-Output "katt" $a $b
+    #}
+    #if ((Get-Random -Minimum 0 -Maximum 20) -eq 10) { #donot do randomly do evry some time.
+    if (-not (Get-Job)) {
+        write-host -ForegroundColor Cyan "OO"
+        try {
+            Start-Job -ScriptBlock $cmd -ArgumentList $snowflakes | Out-Null
+        } catch {}
+        
+    }
+    [object[]]$jobs=Get-Job
+    $gj=$jobs.where({ $psitem.State -eq "Completed"})
+    if ($gj) {
+        $gj | % { 
+            [object[]]$snowflakesm=(Receive-Job $_.Id)
+            $snowflakesm.ForEach({
+                $newSFid=$PSItem.id
+                $SFindex=$snowflakes.id.indexof($newSFid)
+                if ($SFindex -ne -1) {
+                    Write-host -ForegroundColor Green "FF"
+                    $snowflakes[$SFindex].x = $PSItem.x
+                    $snowflakes[$SFindex].y = $PSItem.y
+                    $snowflakes[$SFindex].Stoped = $false
+                }
+            })
+            #Do stuff
+            write-host "X" -ForegroundColor Red
+            #$rjob.Clear()
+            Remove-Job $_.Id 
+        }
+    }
+    #} #this
 }
+
+
+#$cmd = {
+#  param($a, $b)
+#  Write-Host $a $b
+#}
+#
+#$foo = "foo"
+#
+#1..5 | ForEach-Object {
+#  Start-Job -ScriptBlock $cmd -ArgumentList $_, $foo
+#}
+#
+#Get-Job | % { Receive-Job $_.Id; Remove-Job $_.Id }
