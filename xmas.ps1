@@ -411,7 +411,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             
 
         }) | select * -First 1
-        $move.foreach({
+        return $move.foreach({
             $snowflakesChange=New-Object System.Object
             $tempID=$PSItem.ID
             if ((Get-Random -Minimum 1 -Maximum 3) -eq 2) {
