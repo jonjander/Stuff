@@ -390,10 +390,9 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
     param([object[]]$snowflakes)
     
         [object[]]$move=$snowflakes.where({$psitem.Stoped -eq $true}).where({
-            $snowflakesChange=New-Object System.Object
             $xu=$PSItem.x
             $yu=$PSItem.y
-            $tempID=$PSItem.ID
+            #$tempID=$PSItem.ID
             #$range=-1..1
             if (($snowflakes.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
                 if (($snowflakes.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
@@ -413,6 +412,8 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
 
         }) | select * -First 1
         $move.foreach({
+            $snowflakesChange=New-Object System.Object
+            $tempID=$PSItem.ID
             if ((Get-Random -Minimum 1 -Maximum 3) -eq 2) {
                 $PSItem.x++
             } else {
@@ -456,6 +457,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             $snowflakesm.ForEach({
                 $newSFid=$PSItem.id
                 $SFindex=$snowflakes.id.indexof($newSFid)
+                Write-host -ForegroundColor Yellow "AA"
                 if ($SFindex -ne -1) {
                     Write-host -ForegroundColor Green "FF"
                     $snowflakes[$SFindex].x = $PSItem.x
