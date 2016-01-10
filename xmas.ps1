@@ -387,13 +387,29 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
     
     $cmd = {
     param([object[]]$sn)
-        [object[]]$move=$sn.where({$psitem.Stoped -eq $true}).where({
+        [object[]]$moveR=$sn.where({$psitem.Stoped -eq $true}).where({
             $xu=$PSItem.x
             $yu=$PSItem.y
 
             if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {             
-                if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
+            #    if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
                     if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
+            #            if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
+                            (($sn.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -gt 16) -and
+                            (($sn.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0)
+                        } else { $false }
+            #        } else { $false }
+            #    } else { $false }
+            } else { $false }
+        }) | select * -First (Get-Random -Minimum 2 -Maximum 15)
+
+        [object[]]$moveL=$sn.where({$psitem.Stoped -eq $true}).where({
+            $xu=$PSItem.x
+            $yu=$PSItem.y
+
+            #if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {             
+                if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
+            #        if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
                         if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
                             #if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
                                 #if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
@@ -402,26 +418,30 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                                     #(($sn.Where({$PSItem.x -eq ($xu) -and $PSItem.y -eq ($yu)}).Density | measure -Sum).Sum -gt 16)
                                 #} else { $false }
                             #} else { $false }
-                        } else { $false }
-                    } else { $false }
+            #            } else { $false }
+            #       } else { $false }
                 } else { $false }
             } else { $false }
         }) | select * -First (Get-Random -Minimum 2 -Maximum 15)
 
-        $rtemp = $move.foreach({
+        $rtemp = $moveR.foreach({
             $snowflakesChange=New-Object System.Object
             $tempID=$PSItem.ID
-            if ((Get-Random -Minimum 1 -Maximum 3) -eq 2) {
-                $PSItem.x++
-            } else {
-                $PSItem.x--
-            }
+            $PSItem.x++
             $PSItem.Stoped = $false
-
             $snowflakesChange | Add-Member -MemberType NoteProperty -Name ID -value $tempID
             $snowflakesChange | Add-Member -MemberType NoteProperty -Name x -Value $PSItem.x
             $snowflakesChange | Add-Member -MemberType NoteProperty -Name y -Value $PSItem.y
-
+            return $snowflakesChange
+        })
+        $rtemp += $moveL.foreach({
+            $snowflakesChange=New-Object System.Object
+            $tempID=$PSItem.ID
+            $PSItem.x--
+            $PSItem.Stoped = $false
+            $snowflakesChange | Add-Member -MemberType NoteProperty -Name ID -value $tempID
+            $snowflakesChange | Add-Member -MemberType NoteProperty -Name x -Value $PSItem.x
+            $snowflakesChange | Add-Member -MemberType NoteProperty -Name y -Value $PSItem.y
             return $snowflakesChange
         })
 
