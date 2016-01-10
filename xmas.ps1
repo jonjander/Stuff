@@ -384,7 +384,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             #        } else { $false }
             #    } else { $false }
             } else { $false }
-        }) | select * -First (Get-Random -Minimum 2 -Maximum 15)
+        }) | select * -First (Get-Random -Minimum 4 -Maximum 15)
 
         [object[]]$moveL=$sn.where({$psitem.Stoped -eq $true}).where({
             $xu=$PSItem.x
@@ -405,7 +405,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             #       } else { $false }
                 } else { $false }
             } else { $false }
-        }) | select * -First (Get-Random -Minimum 2 -Maximum 15)
+        }) | select * -First (Get-Random -Minimum 4 -Maximum 15)
 
         $rtemp = $moveR.foreach({
             $snowflakesChange=New-Object System.Object
@@ -451,7 +451,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                     $snowflakes[$SFindex].x = $PSItem.x
                     $snowflakes[$SFindex].y = $PSItem.y
                     $snowflakes[$SFindex].Stoped = $false
-                    if ($Debug) {
+                    if (-not $Debug) {
                         [console]::setcursorposition($PSItem.x,$PSItem.y)
                         write-host "Z" -ForegroundColor Red
                     }
