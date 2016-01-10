@@ -160,7 +160,7 @@ $snowflakes+=testFlage
 $snowflakes+=testFlage
 $snowflakes+=testFlage
 $snowflakes+=testFlage
-$snowflakes+=testFlage
+#$snowflakes+=testFlage
 #$snowflakes+=testFlage
 #$snowflakes+=testFlage
 #$snowflakes+=testFlage
@@ -238,7 +238,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         $newy=$PSItem.y
         $down=$true
     }
-    function hitCalc { #fix this. perhaps a do unitl # Nu är det nån jävla flyta på olja effekt.
+    function hitCalc { 
     param (
         $rrr
     )
@@ -319,33 +319,6 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             #sleep 1
         #}
     }
-    
-    #if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
-    #    if (($stFlag.Density | measure -Sum).Sum -gt 16) {
-    #        #Add layer
-    #        $newx=$newx
-    #        $newy=$newy-1
-    #        $down=$true
-    #
-    #}
-    #$stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
-    #if ($stFlag.Count -gt 0) {
-    #    if (($stFlag.Density | measure -Sum).Sum -gt 16) {
-    #
-    #    } else {
-    #        switch (($stFlag.Density | measure -Sum).Sum)
-    #        {
-    #            {$_ -le 5} {$nsk = "▄"}
-    #            {$_ -gt 5 -and $_ -le 10} {$nsk = "░"}
-    #            {$_ -gt 10 -and $_ -le 14} {$nsk = "▓"}
-    #            {$_ -gt 14} {$nsk = "█"}
-    #        }
-    #        $psitem.Skin=$nsk
-    #        #merge
-    #        $down=$true
-    #        }
-    #    }
-    #}
 
     if ($down) {
         $psitem.Stoped = $true
