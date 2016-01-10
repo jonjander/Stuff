@@ -1,1 +1,139 @@
-﻿
+﻿[object[]]$Story=@("This is a test","This is test two","This is test 3")
+$NumberOfParts=$Story.Count
+function Get-KeySilent
+{
+    if([console]::KeyAvailable){
+            while([console]::KeyAvailable){
+                  $key = [console]::readkey("noecho").Key}}
+    else{$key = "nokey"}
+    $key
+}
+
+function ReadFrom-Pos ($x, $y)
+{
+      if($x -ge 0 -and $y -ge 0 -and $x -le [Console]::WindowWidth -and
+            $y -le [Console]::WindowHeight) {
+      $y += [console]::WindowTop
+      $r = New-Object System.Management.Automation.Host.Rectangle $x,$y,$x,$y
+      $host.UI.RawUI.GetBufferContents($r)[0,0]
+      }
+}
+
+#Get-KeySilent
+
+#Init 
+$end=New-Object psobject -Property @{
+    "x" = 0
+    "y" = 0
+}
+
+$wordLocalDB=""
+$i=0
+
+function write-stry {
+    $Story.ForEach({
+        $len=$PSItem.count
+        $CTS=[console]::CursorTop
+        $CLS=[console]::CursorLeft
+        Write-Host "$PSItem" -NoNewline
+        Write-Host ". " -NoNewline
+        $CTE=[console]::CursorTop
+        $CLE=[console]::CursorLeft  
+        $rtemp=New-Object psobject -Property @{
+            "index"=$i
+            "word"=$PSItem
+            "CTS"=$CTS
+            "CLS"=$CLS
+            "CTE"=$CTE
+            "CLE"=$CLE
+        }
+        $i++
+        return $rtemp
+    })
+}
+
+$wordLocalDB=write-stry
+
+
+$wordSelected=0
+$ISlastWord=$false
+$wordChange=$true
+$lastWord=0
+[console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+
+while (1) {
+    $key=Get-KeySilent
+    switch ($key) {
+     {($key -eq "LeftArrow" -and $wordSelected -gt 0)} {
+        [console]::setcursorposition($wordLocalDB[$NumberOfParts - 1].CLE,$wordLocalDB[$NumberOfParts - 1].CTE)
+        Write-Host " " -NoNewline
+        $ISlastWord=$false
+        
+        $ISlastWord=$false
+        $wordSelected--
+        $wordChange = $true
+        break
+     }
+     {($key -eq "RightArrow" -and $wordSelected -lt ($NumberOfParts - 1))} {
+        $ISlastWord=$false
+        $wordSelected++
+        $wordChange = $true
+        break
+     }
+     {($key -eq "RightArrow" -and $wordSelected -eq ($NumberOfParts - 1))} {
+        #add word.
+        #$wordSelected++
+        $ISlastWord=$true
+        [console]::setcursorposition($wordLocalDB[$NumberOfParts - 1].CLE,$wordLocalDB[$NumberOfParts - 1].CTE)
+        Write-Host ">" -ForegroundColor Red -NoNewline
+        #$wordChange = $true
+        break
+     } 
+     "Enter" {
+        [console]::setcursorposition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+        $tmpNw=Read-Host ">"
+        $tmpNw=$tmpNw -replace "\.",""
+        $Story[$wordSelected]=$tmpNw
+        $wordLocalDB=write-stry
+        [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+        #$tmpNw.Clear()
+        [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
+        write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor DarkGreen -ForegroundColor DarkBlue
+        Break
+     }
+     {$key -ne "nokey" -and $ISlastWord -eq $true} {
+        [console]::setcursorposition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+        Write-Host (">:{0}" -f $key) -NoNewline
+        [string]$tmpNw=$key
+        $tmpNw+=Read-Host
+        $tmpNw=$tmpNw -replace "\.",""
+        [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+        $Story+=$tmpNw
+        $NumberOfParts=$Story.Count
+        $wordLocalDB=write-stry
+        $wordSelected = $NumberOfParts - 1
+        $lastWord = $wordSelected
+        [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
+        write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue
+        Break
+     }
+     "." {
+        #Inject left if not last word
+     }
+     "DELETE" {
+        #Fråga om delete.
+     }
+    }
+
+    if ($wordChange -eq $true) {
+
+        [console]::setcursorposition($wordLocalDB[$lastWord].CLS,$wordLocalDB[$lastWord].CTS)
+        write-host ("{0}." -f $wordLocalDB[$lastWord].word)
+        #WriteSelected Word
+        [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
+        write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue
+        $lastWord=$wordSelected
+        $wordChange = $false
+    }
+
+}
