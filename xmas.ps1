@@ -441,7 +441,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
     #}
     #if ((Get-Random -Minimum 0 -Maximum 20) -eq 10) { #donot do randomly do evry some time.
     if (-not (Get-Job)) {
-        write-host -ForegroundColor Cyan "OO"
+        #write-host -ForegroundColor Cyan "OO"
         try {
             Start-Job -ScriptBlock $cmd -ArgumentList (,$snowflakes) # | Out-Null
         } catch {}
