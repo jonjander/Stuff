@@ -102,8 +102,10 @@ for ($x = $left; $x -lt ($right + 1); $x++)
 { 
     for ($y = $top; $y -lt ($bottom + 1); $y++)
     { 
+        try {
         [console]::setcursorposition($x,$y)
         write-host " " -NoNewline
+        } catch {}
     }
 }
 [console]::SetWindowPosition(0,$wt)
@@ -354,32 +356,40 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         #write-c -word "Down!" -wrColor DarkCyan -Color Cyan
         #if ($logi -lt ($bottom -3)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
         #WriteStopped
-        [console]::setcursorposition($newx,$newy)
-        write-host ("{0}" -f $psitem.Skin) -NoNewline -ForegroundColor White
+        try {
+            [console]::setcursorposition($newx,$newy)
+            write-host ("{0}" -f $psitem.Skin) -NoNewline -ForegroundColor White
+        } catch {}
 
     }
 
     if ($out -eq $false) {
         #remove old
-        [console]::setcursorposition($oldx,$oldy)
-        write-host " " -NoNewline
+        try {
+            [console]::setcursorposition($oldx,$oldy)
+            write-host " " -NoNewline
+        } catch {}
         #writeNew
-        [console]::setcursorposition($newx,$newy)
-        write-host ("{0}" -f $psitem.Skin) -NoNewline -ForegroundColor White
+        try {
+            [console]::setcursorposition($newx,$newy)
+            write-host ("{0}" -f $psitem.Skin) -NoNewline -ForegroundColor White
+        } catch {}
         #write-host ("*" -f $psitem.Skin) -NoNewline -ForegroundColor White
         #Update flage posistion
         $psitem.x=$newx
         $psitem.y=$newy
     } else {
         #remove old
-        [console]::setcursorposition($oldx,$oldy)
-        write-host " "
+        try {
+            [console]::setcursorposition($oldx,$oldy)
+            write-host " "
+        } catch {}
         if ($Debug) {
             sleep -Milliseconds 200
             write-host "X" -NoNewline -ForegroundColor Red
         }
         $snowflakes=$snowflakes.Where({$PSItem.id -ne $id})
-        [console]::setcursorposition($logL,$logT)
+        #[console]::setcursorposition($logL,$logT)
     }
 
 })
