@@ -391,8 +391,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         [object[]]$move=$sn.where({$psitem.Stoped -eq $true}).where({
             $xu=$PSItem.x
             $yu=$PSItem.y
-            #$tempID=$PSItem.ID
-            #$range=-1..1
+
             if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {             
                 if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
                     if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
@@ -408,7 +407,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                 } else { $false }
             } else { $false }
         }) | select * -First 5
-        #Write-Host $move
+
         $rtemp = $move.foreach({
             $snowflakesChange=New-Object System.Object
             $tempID=$PSItem.ID
@@ -424,24 +423,11 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             $snowflakesChange | Add-Member -MemberType NoteProperty -Name y -Value $PSItem.y
 
             return $snowflakesChange
-            #$xu=$PSItem.x
-            #$yu=$PSItem.y
-            #[console]::setcursorposition($xu,$yu)
-
-        #    $snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
-        # Add support för melt sideways
-        #
         })
 
         return $rtemp
     } #cmd end
-    #$cmd = {
-    #  param($a, $b)
-    #  Write-Output "katt" $a $b
-    #}
-    #if ((Get-Random -Minimum 0 -Maximum 20) -eq 10) { #donot do randomly do evry some time.
     if (-not (Get-Job)) {
-        #write-host -ForegroundColor Cyan "OO"
         try {
             Start-Job -ScriptBlock $cmd -ArgumentList (,$snowflakes)  | Out-Null
         } catch {}
@@ -464,13 +450,9 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                     $snowflakes[$SFindex].Stoped = $false
                 }
             })
-            #Do stuff
-            #write-host "X" -ForegroundColor Red
-            #$rjob.Clear()
             Remove-Job $_.Id 
         }
     }
-    #} #this
 }
 
 
