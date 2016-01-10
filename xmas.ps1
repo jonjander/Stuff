@@ -387,31 +387,29 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
     #dont run every time
     
     $cmd = {
-    param([object[]]$snowflakes)
-    
-        [object[]]$move=$snowflakes.where({$psitem.Stoped -eq $true}).where({
+    param([object[]]$sn)
+        [object[]]$move=$sn.where({$psitem.Stoped -eq $true}).where({
             $xu=$PSItem.x
             $yu=$PSItem.y
             #$tempID=$PSItem.ID
             #$range=-1..1
-            if (($snowflakes.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
-                if (($snowflakes.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
-                    if (($snowflakes.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
-                        if (($snowflakes.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
-                            if (($snowflakes.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
-                                if (($snowflakes.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
-                                    (($snowflakes.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -gt 16) -and
-                                    (($snowflakes.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -gt 16)
+            if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {             
+                if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
+                    if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
+                        if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
+                            if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
+                                if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
+                                    (($sn.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -gt 16) -and
+                                    (($sn.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -gt 16)
                                 } else { $false }
                             } else { $false }
                         } else { $false }
                     } else { $false }
                 } else { $false }
             } else { $false }
-            
-
-        }) | select * -First 1
-        return $move.foreach({
+        }) | select * -First 5
+        #Write-Host $move
+        $rtemp = $move.foreach({
             $snowflakesChange=New-Object System.Object
             $tempID=$PSItem.ID
             if ((Get-Random -Minimum 1 -Maximum 3) -eq 2) {
@@ -425,17 +423,17 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             $snowflakesChange | Add-Member -MemberType NoteProperty -Name x -Value $PSItem.x
             $snowflakesChange | Add-Member -MemberType NoteProperty -Name y -Value $PSItem.y
 
-            Write-Output $snowflakesChange
+            return $snowflakesChange
             #$xu=$PSItem.x
             #$yu=$PSItem.y
             #[console]::setcursorposition($xu,$yu)
-            #write-host "O" -ForegroundColor Red
-            #sleep 4
 
         #    $snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
         # Add support för melt sideways
         #
         })
+
+        return $rtemp
     } #cmd end
     #$cmd = {
     #  param($a, $b)
@@ -445,10 +443,11 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
     if (-not (Get-Job)) {
         write-host -ForegroundColor Cyan "OO"
         try {
-            Start-Job -ScriptBlock $cmd -ArgumentList $snowflakes | Out-Null
+            Start-Job -ScriptBlock $cmd -ArgumentList (,$snowflakes) # | Out-Null
         } catch {}
         
     }
+
     [object[]]$jobs=Get-Job
     $gj=$jobs.where({ $psitem.State -eq "Completed"})
     if ($gj) {
@@ -457,16 +456,16 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             $snowflakesm.ForEach({
                 $newSFid=$PSItem.id
                 $SFindex=$snowflakes.id.indexof($newSFid)
-                Write-host -ForegroundColor Yellow "AA"
+                #Write-host -ForegroundColor Yellow "AA"
                 if ($SFindex -ne -1) {
-                    Write-host -ForegroundColor Green "FF"
+                    #Write-host -ForegroundColor Green "FF"
                     $snowflakes[$SFindex].x = $PSItem.x
                     $snowflakes[$SFindex].y = $PSItem.y
                     $snowflakes[$SFindex].Stoped = $false
                 }
             })
             #Do stuff
-            write-host "X" -ForegroundColor Red
+            #write-host "X" -ForegroundColor Red
             #$rjob.Clear()
             Remove-Job $_.Id 
         }
