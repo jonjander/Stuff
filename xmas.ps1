@@ -196,7 +196,8 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
     }
     $out=$false
     $down=$false
-    $dir=Get-Random -Minimum 1 -Maximum 4
+    $optdir=@(1,2,3)
+    $dir=Get-Random $optdir
     switch ($dir)
     {
         1 {
@@ -211,6 +212,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         }
         3 {
             #down
+            $newx=$oldx + 0
             $newy=$oldy + 1
         }
     }
@@ -396,15 +398,15 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                             #if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
                                 #if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
                                     (($sn.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -gt 16) -and
-                                    #(($sn.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -gt 16) -and
-                                    (($sn.Where({$PSItem.x -eq ($xu) -and $PSItem.y -eq ($yu)}).Density | measure -Sum).Sum -gt 16)
+                                    (($sn.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0)
+                                    #(($sn.Where({$PSItem.x -eq ($xu) -and $PSItem.y -eq ($yu)}).Density | measure -Sum).Sum -gt 16)
                                 #} else { $false }
                             #} else { $false }
                         } else { $false }
                     } else { $false }
                 } else { $false }
             } else { $false }
-        }) | select * -First 5
+        }) | select * -First (Get-Random -Minimum 2 -Maximum 7)
 
         $rtemp = $move.foreach({
             $snowflakesChange=New-Object System.Object
@@ -446,6 +448,10 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                     $snowflakes[$SFindex].x = $PSItem.x
                     $snowflakes[$SFindex].y = $PSItem.y
                     $snowflakes[$SFindex].Stoped = $false
+                    if ($Debug) {
+                        [console]::setcursorposition($PSItem.x,$PSItem.y)
+                        write-host "Z" -ForegroundColor Red
+                    }
                 }
             })
             Remove-Job $_.Id 
