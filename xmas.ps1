@@ -272,8 +272,8 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                 switch (($stFlag.Density | measure -Sum).Sum)
                 {
                     {$_ -le 5} {$nsk = "▄"}
-                    {$_ -gt 5 -and $_ -le 10} {$nsk = "░"}
-                    {$_ -gt 10 -and $_ -le 14} {$nsk = "▓"}
+                    {$_ -gt 5 -and $_ -le 10} {$nsk = "░"} #░
+                    {$_ -gt 10 -and $_ -le 14} {$nsk = "▓"} #▓
                     {$_ -gt 14} {$nsk = "█"}
                 }
                 $psitem.Skin=$nsk #Behöver säkert returna denna också för att få rätt skin.
@@ -406,7 +406,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                     } else { $false }
                 } else { $false }
             } else { $false }
-        }) | select * -First (Get-Random -Minimum 2 -Maximum 7)
+        }) | select * -First (Get-Random -Minimum 2 -Maximum 15)
 
         $rtemp = $move.foreach({
             $snowflakesChange=New-Object System.Object
