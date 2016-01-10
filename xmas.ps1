@@ -196,7 +196,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
     }
     $out=$false
     $down=$false
-    $dir=Get-Random -Minimum 1 -Maximum 3
+    $dir=Get-Random -Minimum 1 -Maximum 4
     switch ($dir)
     {
         1 {
@@ -246,7 +246,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         $rrr=new-object System.Object
         $stFlag=$snowflakes.where({($psitem.x -eq $newx) -and ($psitem.y -eq $newy) -and ($psitem.Stoped -eq $true)})
         if ($stFlag.Count -gt 0) { #Hit a stopped snowflage
-            if (($stFlag.Density | measure -Sum).Sum -gt 19) {
+            if (($stFlag.Density | measure -Sum).Sum -gt 21) {
                 #Write-Host "MGL!!" $newy -ForegroundColor Blue
                 #[console]::setcursorposition($left,$top + 8)
                 #write-host "Loop newy" $newy (Get-Date) -BackgroundColor White -ForegroundColor Black
@@ -378,9 +378,6 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         }
         $snowflakes=$snowflakes.Where({$PSItem.id -ne $id})
         [console]::setcursorposition($logL,$logT)
-        #write-c -word "Out!" -wrColor DarkCyan -Color Cyan
-        #sleep 1
-        #if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
     }
 
 })
@@ -396,12 +393,13 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                 if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -eq 0 ) {
                     if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
                         if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu - 0)}).Density | measure -Sum).Sum -eq 0 ) {
-                            if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
-                                if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
+                            #if (($sn.Where({$PSItem.x -eq ($xu + 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
+                                #if (($sn.Where({$PSItem.x -eq ($xu - 1) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -eq 0 ) {
                                     (($sn.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu + 1)}).Density | measure -Sum).Sum -gt 16) -and
-                                    (($sn.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -gt 16)
-                                } else { $false }
-                            } else { $false }
+                                    #(($sn.Where({$PSItem.x -eq ($xu + 0) -and $PSItem.y -eq ($yu - 1)}).Density | measure -Sum).Sum -gt 16) -and
+                                    (($sn.Where({$PSItem.x -eq ($xu) -and $PSItem.y -eq ($yu)}).Density | measure -Sum).Sum -gt 16)
+                                #} else { $false }
+                            #} else { $false }
                         } else { $false }
                     } else { $false }
                 } else { $false }
@@ -414,7 +412,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             if ((Get-Random -Minimum 1 -Maximum 3) -eq 2) {
                 $PSItem.x++
             } else {
-                $PSItem.x++
+                $PSItem.x--
             }
             $PSItem.Stoped = $false
 
