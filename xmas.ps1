@@ -443,7 +443,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
     if (-not (Get-Job)) {
         #write-host -ForegroundColor Cyan "OO"
         try {
-            Start-Job -ScriptBlock $cmd -ArgumentList (,$snowflakes) # | Out-Null
+            Start-Job -ScriptBlock $cmd -ArgumentList (,$snowflakes)  | Out-Null
         } catch {}
         
     }
