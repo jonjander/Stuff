@@ -451,7 +451,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                     $snowflakes[$SFindex].x = $PSItem.x
                     $snowflakes[$SFindex].y = $PSItem.y
                     $snowflakes[$SFindex].Stoped = $false
-                    if (-not $Debug) {
+                    if ($Debug) {
                         [console]::setcursorposition($PSItem.x,$PSItem.y)
                         write-host "Z" -ForegroundColor Red
                     }
