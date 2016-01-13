@@ -35,10 +35,20 @@ $i=0
 [console]::SetWindowPosition(0,([console]::CursorTop))
 $WT=[console]::WindowTop
 
+function reset-HelpText {
+    [console]::setcursorposition(2,([console]::WindowTop + [console]::WindowHeight - 2))
+    Write-Host -ForegroundColor DarkBlue -BackgroundColor White "." -NoNewline
+    Write-Host  " Knife " -NoNewline
+    Write-Host -ForegroundColor DarkBlue -BackgroundColor White "DEL" -NoNewline
+    Write-Host  " Delete " -NoNewline
+    Write-Host -ForegroundColor DarkBlue -BackgroundColor White "ENT" -NoNewline
+    Write-Host  " Change " -NoNewline
+}
+
 
 function write-stry {
-    [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
-    #[console]::SetCursorPosition(0,$WT)
+    [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 0))
+    [console]::SetCursorPosition(0,[console]::WindowTop)
     $Story.ForEach({
         $len=$PSItem.count
         $CTS=[console]::CursorTop
@@ -58,8 +68,9 @@ function write-stry {
         $i++
         return $rtemp
     })
+    reset-HelpText
 }
-
+[console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight))
 $wordLocalDB=write-stry
 
 function Clean-inputArea {
@@ -67,10 +78,10 @@ function Clean-inputArea {
     #Clean Input area
     [console]::setcursorposition(0,$pos)
     (1..([console]::WindowWidth)).foreach({Write-Host " " -NoNewline})
-
 }
 
 
+$WriteMode=$false
 $wordSelected=0
 $ISlastWord=$false
 $wordChange=$true
@@ -81,15 +92,7 @@ while (1) {
     $key=Get-KeySilent
     switch ($key) {
     {$key -ne "nokey" -and (ReadFrom-Pos -x 2 -y ([console]::WindowTop + [console]::WindowHeight - 2)).Character -ne "."} {
-        
-        [console]::setcursorposition(2,([console]::WindowTop + [console]::WindowHeight - 2))
-        Write-Host -ForegroundColor DarkBlue -BackgroundColor White "." -NoNewline
-        Write-Host  " Knife " -NoNewline
-        Write-Host -ForegroundColor DarkBlue -BackgroundColor White "DEL" -NoNewline
-        Write-Host  " Delete " -NoNewline
-        Write-Host -ForegroundColor DarkBlue -BackgroundColor White "ENT" -NoNewline
-        Write-Host  " Change " -NoNewline
-        #write-host (ReadFrom-Pos -x 2 -y ([console]::WindowTop + [console]::WindowHeight - 2))
+        reset-HelpText
     }
      {($key -eq "LeftArrow" -and $wordSelected -gt 0)} {
         [console]::setcursorposition($wordLocalDB[$NumberOfParts - 1].CLE,$wordLocalDB[$NumberOfParts - 1].CTE)
@@ -116,19 +119,28 @@ while (1) {
         #$wordChange = $true
         break
      } 
-     "Enter" {
+     {$key -eq "Enter"} {
         [console]::setcursorposition(0,([console]::WindowTop + [console]::WindowHeight - 1))
         $pos = ([console]::WindowTop + [console]::WindowHeight - 1)
+        $wt=[console]::WindowTop #Save pos
         $tmpNw=Read-Host ">"
-        #Clean Input area
-        Clean-inputArea -pos $pos
+        [console]::SetCursorPosition(0,$wt) #Load pos
+        [console]::SetWindowPosition(0,$wt) #Load pos
+        #Write-Host "rwed" -ForegroundColor Red
+        Clean-inputArea -pos $pos #Clean Input area
         $tmpNw=$tmpNw -replace "\.",""
-        $Story[$wordSelected]=$tmpNw
-        $wordLocalDB=write-stry
-        [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
-        #$tmpNw.Clear()
-        [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
-        write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor DarkGreen -ForegroundColor DarkBlue
+        if ($tmpNw -eq "") {
+            $wordLocalDB=write-stry
+            [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+            [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
+            write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue -NoNewline
+        } else {
+            $Story[$wordSelected]=$tmpNw
+            $wordLocalDB=write-stry
+            [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+            [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
+            write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor DarkGreen -ForegroundColor DarkBlue -NoNewline
+        }
         Break
      }
      {$key -ne "nokey" -and $key.ToString().Length -eq 1 -and $ISlastWord -eq $true} {
@@ -137,18 +149,21 @@ while (1) {
         Write-Host (">:{0}" -f $key) -NoNewline
         [string]$tmpNw=$key
         $pos = ([console]::WindowTop + [console]::WindowHeight - 1)
+        $wt=[console]::WindowTop #Save pos
         $tmpNw+=Read-Host
-        Clean-inputArea -pos $pos
+        [console]::SetCursorPosition(0,$wt) #Load pos
+        [console]::SetWindowPosition(0,$wt) #Load pos
+
+
+        Clean-inputArea -pos $pos #Clean Input area
         $tmpNw=$tmpNw -replace "\.",""
-        if ($tmpNw -ne $null) {
+        if ($tmpNw -eq "") {
             $wordLocalDB=write-stry
             $wordSelected = $NumberOfParts - 1
             $lastWord = $wordSelected
             [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
-            write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue
+            write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue -NoNewline
         } else {
-
-        #Clean Input area
             [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
             $Story+=$tmpNw
             $NumberOfParts=$Story.Count
@@ -156,7 +171,7 @@ while (1) {
             $wordSelected = $NumberOfParts - 1
             $lastWord = $wordSelected
             [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
-            write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue
+            write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue -NoNewline
         }
         Break
      }
@@ -171,10 +186,10 @@ while (1) {
     if ($wordChange -eq $true) {
 
         [console]::setcursorposition($wordLocalDB[$lastWord].CLS,$wordLocalDB[$lastWord].CTS)
-        write-host ("{0}." -f $wordLocalDB[$lastWord].word)
+        write-host ("{0}." -f $wordLocalDB[$lastWord].word) -NoNewline
         #WriteSelected Word
         [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
-        write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue
+        write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue -NoNewline
         $lastWord=$wordSelected
         $wordChange = $false
     }
