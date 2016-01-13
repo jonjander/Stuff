@@ -1,5 +1,8 @@
 ﻿[object[]]$Story=@("This is a test","This is test two","This is test 3")
 $NumberOfParts=$Story.Count
+
+cls
+
 function Get-KeySilent
 {
     if([console]::KeyAvailable){
@@ -29,8 +32,13 @@ $end=New-Object psobject -Property @{
 
 $wordLocalDB=""
 $i=0
+[console]::SetWindowPosition(0,([console]::CursorTop))
+$WT=[console]::WindowTop
+
 
 function write-stry {
+    [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+    #[console]::SetCursorPosition(0,$WT)
     $Story.ForEach({
         $len=$PSItem.count
         $CTS=[console]::CursorTop
@@ -54,16 +62,35 @@ function write-stry {
 
 $wordLocalDB=write-stry
 
+function Clean-inputArea {
+    param ($pos)
+    #Clean Input area
+    [console]::setcursorposition(0,$pos)
+    (1..([console]::WindowWidth)).foreach({Write-Host " " -NoNewline})
+
+}
+
 
 $wordSelected=0
 $ISlastWord=$false
 $wordChange=$true
 $lastWord=0
-[console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+#[console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
 
 while (1) {
     $key=Get-KeySilent
     switch ($key) {
+    {$key -ne "nokey" -and (ReadFrom-Pos -x 2 -y ([console]::WindowTop + [console]::WindowHeight - 2)).Character -ne "."} {
+        
+        [console]::setcursorposition(2,([console]::WindowTop + [console]::WindowHeight - 2))
+        Write-Host -ForegroundColor DarkBlue -BackgroundColor White "." -NoNewline
+        Write-Host  " Knife " -NoNewline
+        Write-Host -ForegroundColor DarkBlue -BackgroundColor White "DEL" -NoNewline
+        Write-Host  " Delete " -NoNewline
+        Write-Host -ForegroundColor DarkBlue -BackgroundColor White "ENT" -NoNewline
+        Write-Host  " Change " -NoNewline
+        #write-host (ReadFrom-Pos -x 2 -y ([console]::WindowTop + [console]::WindowHeight - 2))
+    }
      {($key -eq "LeftArrow" -and $wordSelected -gt 0)} {
         [console]::setcursorposition($wordLocalDB[$NumberOfParts - 1].CLE,$wordLocalDB[$NumberOfParts - 1].CTE)
         Write-Host " " -NoNewline
@@ -91,7 +118,10 @@ while (1) {
      } 
      "Enter" {
         [console]::setcursorposition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+        $pos = ([console]::WindowTop + [console]::WindowHeight - 1)
         $tmpNw=Read-Host ">"
+        #Clean Input area
+        Clean-inputArea -pos $pos
         $tmpNw=$tmpNw -replace "\.",""
         $Story[$wordSelected]=$tmpNw
         $wordLocalDB=write-stry
@@ -101,11 +131,15 @@ while (1) {
         write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor DarkGreen -ForegroundColor DarkBlue
         Break
      }
-     {$key -ne "nokey" -and $ISlastWord -eq $true} {
+     {$key -ne "nokey" -and $key.ToString().Length -eq 1 -and $ISlastWord -eq $true} {
+        #Write-Host -ForegroundColor Cyan $key.Length
         [console]::setcursorposition(0,([console]::WindowTop + [console]::WindowHeight - 1))
         Write-Host (">:{0}" -f $key) -NoNewline
         [string]$tmpNw=$key
+        $pos = ([console]::WindowTop + [console]::WindowHeight - 1)
         $tmpNw+=Read-Host
+        #Clean Input area
+        Clean-inputArea -pos $pos
         $tmpNw=$tmpNw -replace "\.",""
         [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
         $Story+=$tmpNw
