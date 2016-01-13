@@ -138,17 +138,26 @@ while (1) {
         [string]$tmpNw=$key
         $pos = ([console]::WindowTop + [console]::WindowHeight - 1)
         $tmpNw+=Read-Host
-        #Clean Input area
         Clean-inputArea -pos $pos
         $tmpNw=$tmpNw -replace "\.",""
-        [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
-        $Story+=$tmpNw
-        $NumberOfParts=$Story.Count
-        $wordLocalDB=write-stry
-        $wordSelected = $NumberOfParts - 1
-        $lastWord = $wordSelected
-        [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
-        write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue
+        if ($tmpNw -ne $null) {
+            $wordLocalDB=write-stry
+            $wordSelected = $NumberOfParts - 1
+            $lastWord = $wordSelected
+            [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
+            write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue
+        } else {
+
+        #Clean Input area
+            [console]::SetWindowPosition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+            $Story+=$tmpNw
+            $NumberOfParts=$Story.Count
+            $wordLocalDB=write-stry
+            $wordSelected = $NumberOfParts - 1
+            $lastWord = $wordSelected
+            [console]::setcursorposition($wordLocalDB[$wordSelected].CLS,$wordLocalDB[$wordSelected].CTS)
+            write-host ("{0}." -f $wordLocalDB[$wordSelected].word) -BackgroundColor White -ForegroundColor DarkBlue
+        }
         Break
      }
      "." {
