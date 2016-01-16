@@ -39,10 +39,7 @@ param (
 
         
         switch ($key) {
-            {$key.key -notin $Specialkeys -and $key.KeyChar.Length -eq 1} {
-
-               
-                ###TEst add
+            {$key.key -notin $Specialkeys -and $key.KeyChar.Length -eq 1} { #Add
                 $inc=0
                 $Output=for ($inc = 0; $inc -lt $Output.Length + 1; $inc++)
                 { 
@@ -51,28 +48,19 @@ param (
                     }
                     $Output[$inc]
                 }
-
-
-                
                 WW
                 [console]::SetCursorPosition($cuPosL + 1,$cuPosT)
-
-                #$Output+=$key.KeyChar
-                #$cPos++
                 break
             }
-            {$key.key -eq "LeftArrow" -and $cuPosL -gt 0} {
+            {$key.key -eq "LeftArrow" -and $cuPosL -gt 0} { #Move Cursor left
                 [console]::SetCursorPosition($cuPosL - 1,$cuPosT)
                 break
             }
-            {$key.key -eq "RightArrow" -and $cuPosL -lt $Output.Length} {
+            {$key.key -eq "RightArrow" -and $cuPosL -lt $Output.Length} { #Mpve Cursor Right
                 [console]::SetCursorPosition($cuPosL + 1,$cuPosT)
                 break
             }
-            {$key.key -eq "Backspace" -and $cPos -gt 0} {
-                #[console]::SetCursorPosition($cuPosL - 1,$cuPosT)
-                #Write-host " "
-                #[console]::SetCursorPosition($cuPosL - 1,$cuPosT)
+            {$key.key -eq "Backspace" -and $cPos -gt 0} { #Backspace Erase
                 [console]::SetCursorPosition(0,$cuPosT) #clear old word
                 (0..($Output.Length)).ForEach({write-host " " -NoNewline})
                 $inc=0
@@ -82,31 +70,35 @@ param (
                     }
                     $inc++
                 })
-
                 WW
                 [console]::SetCursorPosition($cuPosL - 1,$cuPosT)
-
-
-
                 break
             }
-            {$key.key -eq "Delete"} {
-                $editMode=$false
-                write-host ""
-                write-host ($Output -join "") -ForegroundColor Cyan
+            {$key.key -eq "Delete" -and $Output.Length -gt 0} { #Delete Erase
+                [console]::SetCursorPosition(0,$cuPosT) #clear old word
+                (0..($Output.Length)).ForEach({write-host " " -NoNewline})
+                $inc=0
+                [char[]]$Output=$Output.ForEach({
+                    if (-not ($inc -eq $cPos)) {
+                        $PSItem
+                    }
+                    $inc++
+                })
+                WW
+                [console]::SetCursorPosition($cuPosL,$cuPosT)
                 break
             }
             {$key.key -eq "Enter"} {
                 $editMode=$false
-                write-host ""
-                write-host ($Output -join "") -ForegroundColor Cyan
+                #write-host ""
+                #write-host ($Output -join "") -ForegroundColor Cyan
+                [console]::SetCursorPosition(0,$cuPosT)
+                return [string]$($Output -join "")
                 break
             }
         }
 
     }
-
-
 }
 
 read-HostV2
