@@ -10,14 +10,19 @@
 
 
 function read-HostV2 {
+param (
+    [char[]]$StartText="abcd"
+
+)
     $cuPosL=[console]::CursorLeft
     $cuPosT=[console]::CursorTop
     $cPos=0
-    [char[]]$Output="abcd"
+    [char[]]$Output=$StartText
     $wordStartLen=$Output.Length
     function WW {
             [console]::SetCursorPosition(0,$cuPosT)
-            write-host ([string]$($Output -join ""))
+            write-host ([string]$($Output -join "")) -NoNewline
+            #Write-Host X -ForegroundColor Red
             [console]::SetCursorPosition($cPos,$cuPosT)
         }
     WW
@@ -35,19 +40,20 @@ function read-HostV2 {
         
         switch ($key) {
             {$key.key -notin $Specialkeys -and $key.KeyChar.Length -eq 1} {
-                #Write-host -NoNewline $key.KeyChar
-                #write-host ($key | gm)
-                
 
+               
                 ###TEst add
                 $inc=0
-                [char[]]$Output=$Output.ForEach({
-                    $PSItem
-                    if ($inc -eq $cPos -1) {
+                $Output=for ($inc = 0; $inc -lt $Output.Length + 1; $inc++)
+                { 
+                    if ($inc -eq $cPos) {
                         $key.KeyChar
                     }
-                    $inc++
-                })
+                    $Output[$inc]
+                }
+
+
+                
                 WW
                 [console]::SetCursorPosition($cuPosL + 1,$cuPosT)
 
@@ -63,12 +69,13 @@ function read-HostV2 {
                 [console]::SetCursorPosition($cuPosL + 1,$cuPosT)
                 break
             }
-            {$key.key -eq "Backspace"} {
+            {$key.key -eq "Backspace" -and $cPos -gt 0} {
                 #[console]::SetCursorPosition($cuPosL - 1,$cuPosT)
                 #Write-host " "
                 #[console]::SetCursorPosition($cuPosL - 1,$cuPosT)
-                $inc=0
+                [console]::SetCursorPosition(0,$cuPosT) #clear old word
                 (0..($Output.Length)).ForEach({write-host " " -NoNewline})
+                $inc=0
                 [char[]]$Output=$Output.ForEach({
                     if (-not ($inc -eq $cPos -1)) {
                         $PSItem
@@ -83,8 +90,16 @@ function read-HostV2 {
 
                 break
             }
+            {$key.key -eq "Delete"} {
+                $editMode=$false
+                write-host ""
+                write-host ($Output -join "") -ForegroundColor Cyan
+                break
+            }
             {$key.key -eq "Enter"} {
-                
+                $editMode=$false
+                write-host ""
+                write-host ($Output -join "") -ForegroundColor Cyan
                 break
             }
         }
