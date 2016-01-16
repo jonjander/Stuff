@@ -7,8 +7,6 @@
     $key
 }
 
-
-
 function read-HostV2 {
 param (
     [char[]]$StartText="abcd"
@@ -25,19 +23,16 @@ param (
             #Write-Host X -ForegroundColor Red
             [console]::SetCursorPosition($cPos,$cuPosT)
         }
-    WW
+    WW #Write initial input
     
     [console]::SetCursorPosition($wordStartLen,$cuPosT) #Set Start pos to last char
     $editMode=$true
     while ($editMode) {
-        
         $cPos=[console]::CursorLeft
         $cuPosL=[console]::CursorLeft
         $cuPosT=[console]::CursorTop
         $key=Get-KeySilent
-        $Specialkeys=@("Enter","Nokey","LeftArrow","RightArrow","Delete","Backspace")
-
-        
+        $Specialkeys=@("Enter","Nokey","LeftArrow","RightArrow","Delete","Backspace","UpArrow","DownArrow")
         switch ($key) {
             {$key.key -notin $Specialkeys -and $key.KeyChar.Length -eq 1} { #Add
                 $inc=0
