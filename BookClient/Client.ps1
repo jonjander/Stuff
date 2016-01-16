@@ -1,6 +1,7 @@
 ﻿[object[]]$Story=@("This is a test","This is test two","This is test 3")
 $NumberOfParts=$Story.Count
 
+Import-Module Read-HostV2
 cls
 
 function Get-KeySilent
