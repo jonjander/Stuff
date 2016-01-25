@@ -1,4 +1,24 @@
-﻿function getfistpopilation {
+﻿
+$options=@{
+    "0000"="0"
+    "0001"="1"
+    "0010"="2"
+    "0011"="3"
+    "0100"="4"
+    "0101"="5"
+    "0110"="6"
+    "0111"="7"
+    "1000"="8"
+    "1001"="9"
+    "1010"="+"
+    "1011"="-"
+    "1100"="*"
+    "1101"="/"
+    "1110"="0"
+    "1111"="0"
+    }
+
+function getfistpopilation {
 param ($size,$nGenes)
     $rt = for ($i = 0; $i -lt $size; $i++)
     { 
@@ -89,6 +109,29 @@ $score=(($score*100) + ($missR | measure -Sum).Sum) / $totalNumber
 return $score
 }
 
+function getFitness {
+param([string[]]$gene)
+    $goal=1337
+    
+    
+    #$gene="00110001011000011010110101011010111100101111111001110100010001101101010100110110"
+    $rc=$gene -split "(\w{4})" | ? {$_}
+    #$calc="`$r=4+5*8/2"
+    $calc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
+
+
+    try {
+        Invoke-Expression $calc
+    } catch {
+        $r=0
+    }
+    $ggsa=1337-$r
+    $fit=($ggsa/1337)*100
+    if ($fit -lt 0) {$fit=-($fit)}
+    if (100-$fit -lt 0) {$fit=100}
+    return (100-$fit)
+}
+
 function mate {
 param ($newPop)
     $rsum=($newPop.Fitness | measure -Sum).Sum
@@ -134,8 +177,8 @@ param ($pop)
     return $newPop
 }
 
-$spopSize=6000
-$popSize=300
+$spopSize=1000
+$popSize=20
 
 $pop=getfistpopilation -size $spopSize -nGenes 80
 $best=$null
@@ -144,7 +187,12 @@ while ($best.Fitness -ne 100) {
     write-host (($newPop.DNA | sort -Descending |select -First 4)  -join "`n")
 
     $best=$newPop | sort -Property Fitness -Descending | select -First 1
-    Write-Host ([string][char[]]($best.DNA -split "(\w{8})" | ? {$_}).ForEach({[convert]::ToInt32($psitem,2)}))
+    #Write-Host ([string][char[]]($best.DNA -split "(\w{8})" | ? {$_}).ForEach({[convert]::ToInt32($psitem,2)}))
+
+    $rc=$best.DNA -split "(\w{4})" | ? {$_}
+    #$calc="`$r=4+5*8/2"
+    $tcalc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
+    Write-Host $tcalc
     Write-Host "Fitness : " $best.Fitness
     $Childs=mate -newPop $newPop
     #$Childs=$Childs.ForEach({mutate -gene $PSItem -mRate 10})
