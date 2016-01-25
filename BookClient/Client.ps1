@@ -1,8 +1,10 @@
 ﻿[object[]]$Story=@("This is a test","This is test two","This is test 3")
 $NumberOfParts=$Story.Count
 
-Import-Module Read-HostV2
-cls
+Import-Module $PSScriptRoot\Read-HostV2\Read-HostV2.psm1
+cls 
+
+$r=Read-HostV2 -StartText KattSvans
 
 function Get-KeySilent
 {
