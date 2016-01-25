@@ -16,7 +16,7 @@ $options=@{
     "1101"="/"
     "1110"="*"
     "1111"="/"
-    }
+}
 
 function getfistpopilation {
 param ($size,$nGenes)
@@ -65,7 +65,7 @@ param($p1,$p2,$xrate)
     Write-Output $k1
     Write-Output $k2
 } 
-
+<#
 function getFitness {
 param([string[]]$gene)
 
@@ -108,7 +108,7 @@ $score=(($score*100) + ($missR | measure -Sum).Sum) / $totalNumber
 
 return $score
 }
-
+#>
 function getFitness {
 param([string[]]$gene,$goal)
     #$goal=1337
@@ -133,7 +133,7 @@ param([string[]]$gene,$goal)
 }
 
 function mate {
-param ($newPop)
+param ($newPop,$xrate)
     $rsum=($newPop.Fitness | measure -Sum).Sum
     do
     {
@@ -163,7 +163,7 @@ param ($newPop)
     until ($p2.DNA -ne $p1.DNA)
     #Write-Host $p2.DNA -ForegroundColor Cyan
    # Write-Host $p1.DNA -ForegroundColor Cyan
-    return crossover -p1 $p1.DNA -p2 $p2.DNA -xrate 800
+    return crossover -p1 $p1.DNA -p2 $p2.DNA -xrate $xrate
 }
 
 function CalcFitness {
@@ -180,13 +180,17 @@ param ($pop)
 $goal=1337
 
 $spopSize=2000
-$popSize=200
+$popSize=100
 $nGenes=80
+$mrate=1
+$xrate=800
 
-Write-Host "Goal is : " $goal
-Write-Host "Generate fist popilation : " $spopSize
-Write-Host "Popilation Size : " $popSize
-Write-Host "Number of genes in chromosome : " $nGenes
+Write-Host ("Goal is : {0}" -f $goal)
+Write-Host ("Generate fist popilation : {0}" -f $spopSize)
+Write-Host ("Popilation Size : {0}" -f $popSize)
+Write-Host ("Number of genes in chromosome : {0}" -f $nGenes)
+write-host ("Mutation rate : ({0}/100000)" -f $mrate)
+write-host ("Crossover rate : {0}%" -f ($xrate/1000))
 $pop=getfistpopilation -size $spopSize -nGenes $nGenes
 $best=$null
 $CGen=0
@@ -211,8 +215,8 @@ while ($best.Fitness -ne 100) {
     $pop=($newPop | sort -Property Fitness -Descending | select -First 20).DNA
     do
     {
-        $Childs=mate -newPop $newPop
-        $Childs=$Childs.ForEach({mutate -gene $PSItem -mRate 1})
+        $Childs=mate -newPop $newPop -xrate $xrate
+        $Childs=$Childs.ForEach({mutate -gene $PSItem -mRate $mrate})
         $pop = $pop | sort | Get-Unique
         $pop+=$Childs
     }
