@@ -179,13 +179,14 @@ param ($pop)
 
 $goal=1337
 
-$spopSize=1000
-$popSize=20
+$spopSize=2000
+$popSize=200
 $nGenes=80
 
-Write-Host "Goal is " $goal
-Write-Host "Generate fist popilation " $spopSize
-Write-Host "Number of genes " $nGenes
+Write-Host "Goal is : " $goal
+Write-Host "Generate fist popilation : " $spopSize
+Write-Host "Popilation Size : " $popSize
+Write-Host "Number of genes in chromosome : " $nGenes
 $pop=getfistpopilation -size $spopSize -nGenes $nGenes
 $best=$null
 $CGen=0
@@ -202,8 +203,8 @@ while ($best.Fitness -ne 100) {
     $rc=$best.DNA -split "(\w{4})" | ? {$_}
     #$calc="`$r=4+5*8/2"
     $tcalc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
-    Write-Host $tcalc
-    Write-Host "Fitness : " $best.Fitness
+    Write-Host "Calculation result : " $tcalc
+    Write-Host "Current best fitness : " $best.Fitness
     $Childs=mate -newPop $newPop
     #$Childs=$Childs.ForEach({mutate -gene $PSItem -mRate 10})
 
