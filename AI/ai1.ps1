@@ -14,8 +14,8 @@ $options=@{
     "1011"="-"
     "1100"="*"
     "1101"="/"
-    "1110"="0"
-    "1111"="0"
+    "1110"="*"
+    "1111"="/"
     }
 
 function getfistpopilation {
@@ -110,8 +110,8 @@ return $score
 }
 
 function getFitness {
-param([string[]]$gene)
-    $goal=1337
+param([string[]]$gene,$goal)
+    #$goal=1337
     
     
     #$gene="00110001011000011010110101011010111100101111111001110100010001101101010100110110"
@@ -177,13 +177,23 @@ param ($pop)
     return $newPop
 }
 
+$goal=1337
+
 $spopSize=1000
 $popSize=20
+$nGenes=80
 
-$pop=getfistpopilation -size $spopSize -nGenes 80
+Write-Host "Goal is " $goal
+Write-Host "Generate fist popilation " $spopSize
+Write-Host "Number of genes " $nGenes
+$pop=getfistpopilation -size $spopSize -nGenes $nGenes
 $best=$null
+$CGen=0
 while ($best.Fitness -ne 100) {
-    $newPop=CalcFitness -pop $pop
+    $CGen++
+    $newPop=CalcFitness -pop $pop -goal $goal
+    Write-host "Current generation" $CGen
+    write-host "Top 4 best chromosomes"
     write-host (($newPop.DNA | sort -Descending |select -First 4)  -join "`n")
 
     $best=$newPop | sort -Property Fitness -Descending | select -First 1
@@ -206,5 +216,4 @@ while ($best.Fitness -ne 100) {
         $pop+=$Childs
     }
     until ($pop.Count -ge $popSize)
-    
 }
