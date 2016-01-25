@@ -88,7 +88,7 @@ param (
                 #write-host ""
                 #write-host ($Output -join "") -ForegroundColor Cyan
                 [console]::SetCursorPosition(0,$cuPosT)
-                return [string]$($Output -join "")
+                Write-Output ([string]$($Output -join ""))
                 break
             }
         }
