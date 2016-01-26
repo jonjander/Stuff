@@ -14,8 +14,8 @@ $options=@{
     "1011"="-"
     "1100"="*"
     "1101"="/"
-    "1110"="*"
-    "1111"="/"
+    "1110"="%"
+    "1111"="X"
 }
 
 function getfistpopilation {
@@ -123,20 +123,26 @@ param([string[]]$gene,$goal)
     try {
         Invoke-Expression $calc
     } catch {
-        $r=0
+        $r=0.00001
     }
     $ggsa=1337-$r
-    $fit=($ggsa/1337)*100
+    [float]$fit=($ggsa/1337)*100
     if ($fit -lt 0) {$fit=-($fit)}
-    if (100-$fit -lt 0) {$fit=100}
+    if ((100-$fit) -lt 0) {[float]$fit=99.99999}
     return (100-$fit)
 }
 
 function mate {
 param ($newPop,$xrate)
     $rsum=($newPop.Fitness | measure -Sum).Sum
+    $timeout=0
     do
     {
+        $timeout++
+        #write-host $timeout
+        if ($timeout -gt 100) {
+            $script:mrate++
+        }
         #Parent 1
         $esum=0
         $random=Get-Random -Minimum 0 -Maximum $rsum
@@ -160,7 +166,7 @@ param ($newPop,$xrate)
             }
         }) | select -First 1
         }    
-    until ($p2.DNA -ne $p1.DNA)
+    until ($p2.DNA -ne $p1.DNA -or $timeout -gt 102)
     #Write-Host $p2.DNA -ForegroundColor Cyan
    # Write-Host $p1.DNA -ForegroundColor Cyan
     return crossover -p1 $p1.DNA -p2 $p2.DNA -xrate $xrate
@@ -168,7 +174,11 @@ param ($newPop,$xrate)
 
 function CalcFitness {
 param ($pop)
+    $popt=$pop.count
+    $popi=0
     $newPop=$pop.ForEach({
+        $popi++
+        write-progress -id  1 -activity "Calc fitness" -status 'Progress' -percentcomplete (($popi/$popt)*100)
         $r=New-Object System.Object
         $r | Add-Member -MemberType NoteProperty -Name DNA -Value $PSItem
         $r | Add-Member -MemberType NoteProperty -Name Fitness -Value (getFitness -gene $PSItem)
@@ -179,10 +189,10 @@ param ($pop)
 
 $goal=1337
 
-$spopSize=2000
-$popSize=100
+$spopSize=700
+$popSize=300
 $nGenes=80
-$mrate=1
+$mrate=3
 $xrate=800
 
 Write-Host ("Goal is : {0}" -f $goal)
@@ -197,7 +207,7 @@ $CGen=0
 while ($best.Fitness -ne 100) {
     $CGen++
     $newPop=CalcFitness -pop $pop -goal $goal
-    Write-host "Current generation" $CGen
+    
     write-host "Top 4 best chromosomes"
     write-host (($newPop.DNA | sort -Descending |select -First 4)  -join "`n")
 
@@ -207,18 +217,24 @@ while ($best.Fitness -ne 100) {
     $rc=$best.DNA -split "(\w{4})" | ? {$_}
     #$calc="`$r=4+5*8/2"
     $tcalc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
-    Write-Host "Calculation result : " $tcalc
-    Write-Host "Current best fitness : " $best.Fitness
-    $Childs=mate -newPop $newPop
+    Write-host ("Current generation : {0}" -f $CGen)
+    Write-Host ("Popilation size : {0}" -f ($newPop).count)
+    Write-Host ("Calculation result : {0}" -f $tcalc)
+    Write-Host ("Current best fitness : {0}" -f $best.Fitness)
+    Write-Host ("Mutation rate {0}" -f $mrate)
+    #$Childs=mate -newPop $newPop
     #$Childs=$Childs.ForEach({mutate -gene $PSItem -mRate 10})
 
-    $pop=($newPop | sort -Property Fitness -Descending | select -First 20).DNA
+    [string[]]$pop=($newPop | sort -Property Fitness -Descending | select -First (get-random -Minimum 1 -Maximum 10)).DNA
     do
-    {
+    { 
         $Childs=mate -newPop $newPop -xrate $xrate
         $Childs=$Childs.ForEach({mutate -gene $PSItem -mRate $mrate})
-        $pop = $pop | sort | Get-Unique
         $pop+=$Childs
+        $pop = $pop | sort | Get-Unique
     }
-    until ($pop.Count -ge $popSize)
+    until ($pop.Count -ge ($popSize + (get-random -Minimum 0 -Maximum 20)))
+    
 }
+
+#5+501-8%3*-42%67+814
