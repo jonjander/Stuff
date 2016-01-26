@@ -145,7 +145,7 @@ param ($newPop,$xrate)
         }
         #Parent 1
         $esum=0
-        $random=Get-Random -Minimum 0 -Maximum $rsum
+        $random=Get-Random -Minimum 0.000001 -Maximum $rsum
         $p1=$newPop.where({
             $esum+=$PSItem.Fitness
             if ($random -le $esum -and $random -gt ($esum - $PSItem.Fitness)) {
@@ -156,7 +156,7 @@ param ($newPop,$xrate)
         }) | select -First 1
         #Parent 2
         $esum=0
-        $random=Get-Random -Minimum 0 -Maximum $rsum
+        $random=Get-Random -Minimum 0.000001 -Maximum $rsum
         $p2=$newPop.where({
             $esum+=$PSItem.Fitness
             if ($random -le $esum -and $random -gt ($esum - $PSItem.Fitness)) {
