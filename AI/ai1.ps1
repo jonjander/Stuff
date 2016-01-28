@@ -111,10 +111,6 @@ return $score
 #>
 function getFitness {
 param([string[]]$gene,$goal)
-    #$goal=1337
-    
-    
-    #$gene="00110001011000011010110101011010111100101111111001110100010001101101010100110110"
     $rc=$gene -split "(\w{4})" | ? {$_}
     #$calc="`$r=4+5*8/2"
     $calc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
@@ -128,8 +124,8 @@ param([string[]]$gene,$goal)
     if ($r.ToString() -eq "¤¤¤") {
         $r=0
     }
-    $ggsa=1337-$r
-    [float]$fit=($ggsa/1337)*100
+    $ggsa=$goal-$r
+    [float]$fit=($ggsa/$goal)*100
     if ($fit -lt 0) {$fit=-($fit)}
     if ((100-$fit) -lt 0) {[float]$fit=99}
     $ru=(100-$fit)
@@ -179,7 +175,7 @@ param ($newPop,$xrate)
 }
 
 function CalcFitness {
-param ($pop)
+param ($pop,$goal)
     $popt=$pop.count
     $popi=0
     $newPop=$pop.ForEach({
@@ -187,13 +183,13 @@ param ($pop)
         write-progress -id  1 -activity "Calc fitness" -status 'Progress' -percentcomplete (($popi/$popt)*100)
         $r=New-Object System.Object
         $r | Add-Member -MemberType NoteProperty -Name DNA -Value $PSItem
-        $r | Add-Member -MemberType NoteProperty -Name Fitness -Value (getFitness -gene $PSItem)
+        $r | Add-Member -MemberType NoteProperty -Name Fitness -Value (getFitness -gene $PSItem -goal $goal)
         return $r
     })
     return $newPop
 }
 
-$goal=1337
+$goal=940418
 
 $spopSize=600
 $popSize=350
