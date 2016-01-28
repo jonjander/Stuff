@@ -123,13 +123,19 @@ param([string[]]$gene,$goal)
     try {
         Invoke-Expression $calc
     } catch {
-        $r=0.00001
+        $r=0
+    }
+    if ($r.ToString() -eq "¤¤¤") {
+        $r=0
     }
     $ggsa=1337-$r
     [float]$fit=($ggsa/1337)*100
     if ($fit -lt 0) {$fit=-($fit)}
-    if ((100-$fit) -lt 0) {[float]$fit=99.99999}
-    return (100-$fit)
+    if ((100-$fit) -lt 0) {[float]$fit=99}
+    $ru=(100-$fit)
+    if ($ru -eq 0) {$ru=1}
+    #Write-Host $ru 
+    return $ru
 }
 
 function mate {
@@ -140,12 +146,12 @@ param ($newPop,$xrate)
     {
         $timeout++
         #write-host $timeout
-        if ($timeout -gt 100) {
+        if ($timeout -gt 4) {
             $script:mrate++
         }
         #Parent 1
         $esum=0
-        $random=Get-Random -Minimum 0.000001 -Maximum $rsum
+        $random=Get-Random -Minimum 0 -Maximum $rsum
         $p1=$newPop.where({
             $esum+=$PSItem.Fitness
             if ($random -le $esum -and $random -gt ($esum - $PSItem.Fitness)) {
@@ -156,7 +162,7 @@ param ($newPop,$xrate)
         }) | select -First 1
         #Parent 2
         $esum=0
-        $random=Get-Random -Minimum 0.000001 -Maximum $rsum
+        $random=Get-Random -Minimum 0 -Maximum $rsum
         $p2=$newPop.where({
             $esum+=$PSItem.Fitness
             if ($random -le $esum -and $random -gt ($esum - $PSItem.Fitness)) {
@@ -166,7 +172,7 @@ param ($newPop,$xrate)
             }
         }) | select -First 1
         }    
-    until ($p2.DNA -ne $p1.DNA -or $timeout -gt 102)
+    until ($p2.DNA -ne $p1.DNA -or $timeout -gt 5)
     #Write-Host $p2.DNA -ForegroundColor Cyan
    # Write-Host $p1.DNA -ForegroundColor Cyan
     return crossover -p1 $p1.DNA -p2 $p2.DNA -xrate $xrate
@@ -189,10 +195,10 @@ param ($pop)
 
 $goal=1337
 
-$spopSize=700
-$popSize=300
+$spopSize=600
+$popSize=350
 $nGenes=80
-$mrate=3
+$mrate=4
 $xrate=800
 
 Write-Host ("Goal is : {0}" -f $goal)
