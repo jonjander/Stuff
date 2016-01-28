@@ -227,13 +227,13 @@ while ($best.Fitness -ne 100) {
     #$Childs=mate -newPop $newPop
     #$Childs=$Childs.ForEach({mutate -gene $PSItem -mRate 10})
 
-    [string[]]$pop=($newPop | sort -Property Fitness -Descending | select -First (get-random -Minimum 1 -Maximum 10)).DNA
+    [string[]]$pop=($newPop | sort -Property Fitness -Descending | select -First (get-random -Minimum 0 -Maximum 20)).DNA #surving 
     do
     { 
         $Childs=mate -newPop $newPop -xrate $xrate
         $Childs=$Childs.ForEach({mutate -gene $PSItem -mRate $mrate})
         $pop+=$Childs
-        $pop = $pop | sort | Get-Unique
+        $pop = $pop | sort | Get-Unique #Only 
     }
     until ($pop.Count -ge ($popSize + (get-random -Minimum 0 -Maximum 20)))
     
