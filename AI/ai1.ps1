@@ -18,7 +18,7 @@ $options=@{
     "1111"="X"
 }
 
-function getfistpopilation {
+function getFirstPopulation {
 param ($size,$nGenes)
     $rt = for ($i = 0; $i -lt $size; $i++)
     { 
@@ -31,7 +31,7 @@ param ($size,$nGenes)
    return $rt
 }
 
-function mutate {
+function Mutate {
 param ($mRate,$gene)
     [byte[]]$gAr=($gene -split "")[1..$gene.Length]
     $ng=$gAr.ForEach({
@@ -65,62 +65,12 @@ param($p1,$p2,$xrate)
     Write-Output $k1
     Write-Output $k2
 } 
-<#
-function getFitness {
-param([string[]]$gene)
 
-
-[byte[]][char[]]$Goal="Hejsan Jon"
-$Rgoal=$Goal.ForEach({[convert]::ToString($PSItem,2)}).PadLeft(8,"0") -join ""
-#$Rgoal.Length
-
-$rc=$Rgoal -split "(\w{8})" | ? {$_}
-$gc=$gene  -split "(\w{8})" | ? {$_}
-$comO=for ($i = 0; $i -lt $rc.Count; $i++)
-{ 
-    Compare-Object -ReferenceObject $rc[$i] -DifferenceObject $gc[$i] -IncludeEqual
-}
-#Compare-Object -ReferenceObject $rc[0] -DifferenceObject $gc[0] -IncludeEqual
-$score=0
-$score+=$comO.where({$PSItem.SideIndicator -eq "=="}).count
-
-$miss=$comO.where({$PSItem.SideIndicator -ne "=="})
-$ml=$miss.Count
-$iu=0
-$missR=$miss[0..(($ml/2)-1)].ForEach({
-    
-    #write-host $psitem.InputObject -ForegroundColor Green
-    #write-host $miss[($ml/2)..($miss.Count)][$iu].InputObject -ForegroundColor Red
-    $bas=$psitem.InputObject
-    $ref=$miss[($ml/2)..($miss.Count)][$iu].InputObject
-    $errorindev=([convert]::ToInt32($bas,2)) - ([convert]::ToInt32($ref,2))
-    $nRb=([char[]][string]($bas -band $ref)).where({$psitem -eq "1"}).count
-
-    $bitdifFitness=100-$errorindev/255
-    $bitFitness=($nRb/8*100)/8
-    ($bitdifFitness+$bitFitness)/2
-    $iu++
-})
-
-$NumberOfMiss=$missR.Count
-$totalNumber=$NumberOfMiss+$score
-$score=(($score*100) + ($missR | measure -Sum).Sum) / $totalNumber
-
-return $score
-}
-#>
 function getFitness {
 param([string[]]$gene,[float]$goal)
     $rc=$gene -split "(\w{4})" | ? {$_}
-    #$calc="`$r=4+5*8/2"
     $calc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
-
-
-    try {
-        Invoke-Expression $calc 
-    } catch {
-        $r=0
-    }
+    try { Invoke-Expression $calc } catch { $r=0 }
     try {
         if ($r.ToString() -eq "¤¤¤") {
             $r=0
@@ -128,19 +78,14 @@ param([string[]]$gene,[float]$goal)
     } catch {
         $r=0
     }
-
-
     $ggsa=$goal-$r
     [float]$fit=($ggsa/$goal)*100
     if ($fit -lt 0) {$fit=-($fit)}
     if ((100-$fit) -lt 0) {[float]$fit=99}
     $ru=(100-$fit)
     if ($ru -eq 0) {$ru=1}
-    #Write-Host $ru 
-
-        
-    if ($ru -eq 100) { #substract penelty for using *0 or +0 ops
-        $tmpScount=($calc -split "(([^\d]0\*)|(\*0)|(\+0)|([^\d]0\+))|(\/1[^\d])|([^\d]\+\d)" | ? {$_}).count
+    if ($ru -eq 100) { #substract penalty for using *0 or +0 ops
+        $tmpScount=($calc -split "(([^\d]0\*)|(\*0)|(\+0)|([^\d]0\+))|(\/1[^\d])|(\/1$)|([^\d]\+\d)|(\*1[^\d])|(\*1$)" | ? {$_}).count
         if ($tmpScount -gt 1) {
             $ru -= ($tmpScount * 0.0001)
         }
@@ -204,13 +149,13 @@ param ($pop,$goal)
     return $newPop
 }
 
-$goal=13.37
+$goal=1337
 
-$spopSize=600
-$popSize=350
-$nGenes=80
-$mrate=4
-$xrate=800
+$spopSize=600 #initial population size
+$popSize=350 #Population size
+$nGenes=(4*20) #each character requires four genes
+$mrate=4 #Mutation rate
+$xrate=800 #Crossover rate
 
 Write-Host ("Goal is : {0}" -f $goal)
 Write-Host ("Generate fist popilation : {0}" -f $spopSize)
@@ -218,7 +163,7 @@ Write-Host ("Popilation Size : {0}" -f $popSize)
 Write-Host ("Number of genes in chromosome : {0}" -f $nGenes)
 write-host ("Mutation rate : ({0}/100000)" -f $mrate)
 write-host ("Crossover rate : {0}%" -f ($xrate/1000))
-$pop=getfistpopilation -size $spopSize -nGenes $nGenes
+$pop=getFirstPopulation -size $spopSize -nGenes $nGenes
 $best=$null
 $CGen=0
 while ($best.Fitness -ne 100) {
@@ -240,7 +185,7 @@ while ($best.Fitness -ne 100) {
     Write-Host ("Current best fitness : {0}" -f $best.Fitness)
     Write-Host ("Mutation rate {0}" -f $mrate)
     #$Childs=mate -newPop $newPop
-    #$Childs=$Childs.ForEach({mutate -gene $PSItem -mRate 10})
+    #$Childs=$Childs.ForEach({Mutate -gene $PSItem -mRate 10})
 
     [string[]]$pop=($newPop | sort -Property Fitness -Descending | select -First (get-random -Minimum 0 -Maximum 20)).DNA #surving 
     $tmpResize=(get-random -Minimum 0 -Maximum 20)
@@ -248,12 +193,10 @@ while ($best.Fitness -ne 100) {
     { 
         write-progress -id  2 -activity "Generating new popilation" -status 'Progress' -percentcomplete (($pop.Count/($popSize + $tmpResize))*100)
         $Childs=mate -newPop $newPop -xrate $xrate
-        $Childs=$Childs.ForEach({mutate -gene $PSItem -mRate $mrate})
+        $Childs=$Childs.ForEach({Mutate -gene $PSItem -mRate $mrate})
         $pop+=$Childs
         $pop = $pop | sort | Get-Unique #Only 
     }
     until ($pop.Count -ge ($popSize + $tmpResize))
     write-progress -id 2 -Completed -Activity "Generating new popilation"
 }
-
-#5+501-8%3*-42%67+814
