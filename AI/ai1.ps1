@@ -15,7 +15,7 @@ $options=@{
     "1100"="*"
     "1101"="/"
     "1110"="%"
-    "1111"="X"
+    "1111"="."
 }
 
 function getfistpopilation {
@@ -110,20 +110,26 @@ return $score
 }
 #>
 function getFitness {
-param([string[]]$gene,$goal)
+param([string[]]$gene,[float]$goal)
     $rc=$gene -split "(\w{4})" | ? {$_}
     #$calc="`$r=4+5*8/2"
-    $calc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
+    $calc="[float]`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
 
 
     try {
         Invoke-Expression $calc
     } catch {
-        $r=0
+        [float]$r=0
     }
-    if ($r.ToString() -eq "¤¤¤") {
-        $r=0
+    try {
+        if ($r.ToString() -eq "¤¤¤") {
+            [float]$r=0
+        }
+    } catch {
+        [float]$r=0
     }
+
+
     $ggsa=$goal-$r
     [float]$fit=($ggsa/$goal)*100
     if ($fit -lt 0) {$fit=-($fit)}
@@ -131,6 +137,14 @@ param([string[]]$gene,$goal)
     $ru=(100-$fit)
     if ($ru -eq 0) {$ru=1}
     #Write-Host $ru 
+
+        
+    if ($ru -eq 100) {
+        $tmpScount=($calc -split "(([^\d]0\*)|(\*0)|(\+0)|([^\d]0\+))" | ? {$_}).count
+        if ($tmpScount -gt 1) {
+            $ru -= ($tmpScount * 0.01)
+        }
+    }
     return $ru
 }
 
@@ -189,7 +203,7 @@ param ($pop,$goal)
     return $newPop
 }
 
-$goal=940418
+$goal=13.37
 
 $spopSize=600
 $popSize=350
