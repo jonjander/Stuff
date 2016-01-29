@@ -148,8 +148,8 @@ param ($pop,$goal)
 
 $goal=1337
 
-$spopSize=600 #initial population size
-$popSize=350 #Population size
+$spopSize=1000 #initial population size
+$popSize=600 #Population size
 $nGenes=(4*20) #each character requires four genes
 $mrate=4 #Mutation rate
 $xrate=800 #Crossover rate
