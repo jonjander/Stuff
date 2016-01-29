@@ -142,7 +142,7 @@ param([string[]]$gene,[float]$goal)
     if ($ru -eq 100) { #substract penelty for using *0 or +0 ops
         $tmpScount=($calc -split "(([^\d]0\*)|(\*0)|(\+0)|([^\d]0\+))|(\/1[^\d])|([^\d]\+\d)" | ? {$_}).count
         if ($tmpScount -gt 1) {
-            $ru -= ($tmpScount * 0.01)
+            $ru -= ($tmpScount * 0.0001)
         }
     }
     return $ru
