@@ -15,7 +15,7 @@ $options=@{
     "1100"="*"
     "1101"="/"
     "1110"="%"
-    "1111"="."
+    "1111"="X"
 }
 
 function getfistpopilation {
@@ -113,20 +113,20 @@ function getFitness {
 param([string[]]$gene,[float]$goal)
     $rc=$gene -split "(\w{4})" | ? {$_}
     #$calc="`$r=4+5*8/2"
-    $calc="[float]`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
+    $calc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
 
 
     try {
         Invoke-Expression $calc
     } catch {
-        [float]$r=0
+        $r=0
     }
     try {
         if ($r.ToString() -eq "¤¤¤") {
-            [float]$r=0
+            $r=0
         }
     } catch {
-        [float]$r=0
+        $r=0
     }
 
 
@@ -139,8 +139,8 @@ param([string[]]$gene,[float]$goal)
     #Write-Host $ru 
 
         
-    if ($ru -eq 100) {
-        $tmpScount=($calc -split "(([^\d]0\*)|(\*0)|(\+0)|([^\d]0\+))" | ? {$_}).count
+    if ($ru -eq 100) { #substract penelty for using *0 or +0 ops
+        $tmpScount=($calc -split "(([^\d]0\*)|(\*0)|(\+0)|([^\d]0\+))|(\/1[^\d])|([^\d]\+\d)" | ? {$_}).count
         if ($tmpScount -gt 1) {
             $ru -= ($tmpScount * 0.01)
         }
@@ -242,14 +242,16 @@ while ($best.Fitness -ne 100) {
     #$Childs=$Childs.ForEach({mutate -gene $PSItem -mRate 10})
 
     [string[]]$pop=($newPop | sort -Property Fitness -Descending | select -First (get-random -Minimum 0 -Maximum 20)).DNA #surving 
+    $tmpResize=(get-random -Minimum 0 -Maximum 20)
     do
     { 
+        write-progress -id  2 -activity "Generating new popilation" -status 'Progress' -percentcomplete (($pop.Count/($popSize + $tmpResize))*100)
         $Childs=mate -newPop $newPop -xrate $xrate
         $Childs=$Childs.ForEach({mutate -gene $PSItem -mRate $mrate})
         $pop+=$Childs
         $pop = $pop | sort | Get-Unique #Only 
     }
-    until ($pop.Count -ge ($popSize + (get-random -Minimum 0 -Maximum 20)))
+    until ($pop.Count -ge ($popSize + $tmpResize))
     
 }
 
