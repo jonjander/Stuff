@@ -100,7 +100,6 @@ param ($newPop,$xrate)
     do
     {
         $timeout++
-        #write-host $timeout
         if ($timeout -gt 4) {
             $script:mrate++
         }
@@ -128,8 +127,6 @@ param ($newPop,$xrate)
         }) | select -First 1
         }    
     until ($p2.DNA -ne $p1.DNA -or $timeout -gt 5)
-    #Write-Host $p2.DNA -ForegroundColor Cyan
-   # Write-Host $p1.DNA -ForegroundColor Cyan
     return crossover -p1 $p1.DNA -p2 $p2.DNA -xrate $xrate
 }
 
@@ -169,24 +166,16 @@ $CGen=0
 while ($best.Fitness -ne 100) {
     $CGen++
     $newPop=CalcFitness -pop $pop -goal $goal
-    
     write-host "Top 4 best chromosomes"
     write-host (($newPop.DNA | sort -Descending |select -First 4)  -join "`n")
-
     $best=$newPop | sort -Property Fitness -Descending | select -First 1
-    #Write-Host ([string][char[]]($best.DNA -split "(\w{8})" | ? {$_}).ForEach({[convert]::ToInt32($psitem,2)}))
-
     $rc=$best.DNA -split "(\w{4})" | ? {$_}
-    #$calc="`$r=4+5*8/2"
     $tcalc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
     Write-host ("Current generation : {0}" -f $CGen)
     Write-Host ("Popilation size : {0}" -f ($newPop).count)
     Write-Host ("Calculation result : {0}" -f $tcalc)
     Write-Host ("Current best fitness : {0}" -f $best.Fitness)
     Write-Host ("Mutation rate {0}" -f $mrate)
-    #$Childs=mate -newPop $newPop
-    #$Childs=$Childs.ForEach({Mutate -gene $PSItem -mRate 10})
-
     [string[]]$pop=($newPop | sort -Property Fitness -Descending | select -First (get-random -Minimum 0 -Maximum 20)).DNA #surving 
     $tmpResize=(get-random -Minimum 0 -Maximum 20)
     do
@@ -195,7 +184,7 @@ while ($best.Fitness -ne 100) {
         $Childs=mate -newPop $newPop -xrate $xrate
         $Childs=$Childs.ForEach({Mutate -gene $PSItem -mRate $mrate})
         $pop+=$Childs
-        $pop = $pop | sort | Get-Unique #Only 
+        $pop = $pop | sort | Get-Unique
     }
     until ($pop.Count -ge ($popSize + $tmpResize))
     write-progress -id 2 -Completed -Activity "Generating new popilation"
