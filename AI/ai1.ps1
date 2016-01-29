@@ -117,7 +117,7 @@ param([string[]]$gene,[float]$goal)
 
 
     try {
-        Invoke-Expression $calc
+        Invoke-Expression $calc 
     } catch {
         $r=0
     }
@@ -200,6 +200,7 @@ param ($pop,$goal)
         $r | Add-Member -MemberType NoteProperty -Name Fitness -Value (getFitness -gene $PSItem -goal $goal)
         return $r
     })
+    write-progress -id  1 -Completed -Activity "Calc fitness"
     return $newPop
 }
 
@@ -252,7 +253,7 @@ while ($best.Fitness -ne 100) {
         $pop = $pop | sort | Get-Unique #Only 
     }
     until ($pop.Count -ge ($popSize + $tmpResize))
-    
+    write-progress -id 2 -Completed -Activity "Generating new popilation"
 }
 
 #5+501-8%3*-42%67+814
