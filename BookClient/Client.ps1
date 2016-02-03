@@ -4,7 +4,7 @@ $NumberOfParts=$Story.Count
 Import-Module $PSScriptRoot\Read-HostV2\Read-HostV2.psm1
 cls 
 
-$r=Read-HostV2 -StartText KattSvans
+#$r=Read-HostV2 -StartText KattSvans
 
 function Get-KeySilent
 {
@@ -149,11 +149,12 @@ while (1) {
      {$key -ne "nokey" -and $key.ToString().Length -eq 1 -and $ISlastWord -eq $true} {
         #Write-Host -ForegroundColor Cyan $key.Length
         [console]::setcursorposition(0,([console]::WindowTop + [console]::WindowHeight - 1))
-        Write-Host (">:{0}" -f $key) -NoNewline
+        Write-Host (">:" -f $key) -NoNewline
         [string]$tmpNw=$key
         $pos = ([console]::WindowTop + [console]::WindowHeight - 1)
         $wt=[console]::WindowTop #Save pos
-        $tmpNw+=Read-Host
+        $tmpNw=Read-HostV2 -StartText $tmpNw
+        #$tmpNw+=Read-Host
         [console]::SetCursorPosition(0,$wt) #Load pos
         [console]::SetWindowPosition(0,$wt) #Load pos
 
