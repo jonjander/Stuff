@@ -37,11 +37,13 @@ param (
             {$key.key -notin $Specialkeys -and $key.KeyChar.Length -eq 1} { #Add
                 $inc=0
                 $Output=for ($inc = 0; $inc -lt $Output.Length + 1; $inc++)
-                { 
+                {  
                     if ($inc -eq $cPos) {
                         $key.KeyChar
                     }
-                    $Output[$inc]
+                    if ($Output[$inc]) {
+                        $Output[$inc]
+                    }
                 }
                 WW
                 [console]::SetCursorPosition($cuPosL + 1,$cuPosT)
@@ -88,7 +90,7 @@ param (
                 #write-host ""
                 #write-host ($Output -join "") -ForegroundColor Cyan
                 [console]::SetCursorPosition(0,$cuPosT)
-                Write-Output ([string]$($Output -join ""))
+                Write-Output ([string]$($Output -join "")).Trim()
                 break
             }
         }
