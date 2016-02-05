@@ -1,7 +1,7 @@
 ﻿[object[]]$Story=@("This is a test","This is test two","This is test 3")
 $NumberOfParts=$Story.Count
 
-Import-Module $PSScriptRoot\Read-HostV2\Read-HostV2.psm1
+Import-Module $PSScriptRoot\Read-HostV2\Read-HostV2.psm1 -Force
 cls 
 
 #$r=Read-HostV2 -StartText KattSvans
@@ -96,6 +96,7 @@ while (1) {
     switch ($key) {
     {$key -ne "nokey" -and (ReadFrom-Pos -x 2 -y ([console]::WindowTop + [console]::WindowHeight - 2)).Character -ne "."} {
         reset-HelpText
+        #Write-Host $key
     }
      {($key -eq "LeftArrow" -and $wordSelected -gt 0)} {
         [console]::setcursorposition($wordLocalDB[$NumberOfParts - 1].CLE,$wordLocalDB[$NumberOfParts - 1].CTE)
@@ -124,9 +125,11 @@ while (1) {
      } 
      {$key -eq "Enter"} {
         [console]::setcursorposition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+        Write-Host (">:") -NoNewline
         $pos = ([console]::WindowTop + [console]::WindowHeight - 1)
         $wt=[console]::WindowTop #Save pos
-        $tmpNw=Read-Host ">"
+        #$tmpNw=Read-Host ">"
+        $tmpNw=Read-HostV2 -StartText $Story[$wordSelected]
         [console]::SetCursorPosition(0,$wt) #Load pos
         [console]::SetWindowPosition(0,$wt) #Load pos
         #Write-Host "rwed" -ForegroundColor Red
@@ -179,8 +182,19 @@ while (1) {
         }
         Break
      }
-     "." {
+     "OemPeriod" {
         #Inject left if not last word
+        #[console]::setcursorposition($wordLocalDB[$wordSelected - 1].CLE - 1,$wordLocalDB[$wordSelected - 1].CTE)
+        #write-host "<" -ForegroundColor Red
+        [console]::setcursorposition(0,([console]::WindowTop + [console]::WindowHeight - 1))
+        Write-Host (">:") -NoNewline
+        [string]$tmpNw=$key
+        $pos = ([console]::WindowTop + [console]::WindowHeight - 1)
+        $wt=[console]::WindowTop #Save pos
+        $tmpNw=Read-HostV2
+        if ($tmpNw -ne $null) {
+
+        }
      }
      "DELETE" {
         #Fråga om delete.
