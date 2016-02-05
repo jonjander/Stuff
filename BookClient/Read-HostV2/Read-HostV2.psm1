@@ -12,13 +12,14 @@ param (
     [char[]]$StartText="abcd"
 
 )
+    $LZero=[console]::CursorLeft
     $cuPosL=[console]::CursorLeft
     $cuPosT=[console]::CursorTop
-    $cPos=0
+    $cPos=$cuPosL
     [char[]]$Output=$StartText
-    $wordStartLen=$Output.Length
+    $wordStartLen=$Output.Length + $LZero
     function WW {
-            [console]::SetCursorPosition(0,$cuPosT)
+            [console]::SetCursorPosition($LZero,$cuPosT)
             write-host ([string]$($Output -join "")) -NoNewline
             #Write-Host X -ForegroundColor Red
             [console]::SetCursorPosition($cPos,$cuPosT)
@@ -38,7 +39,7 @@ param (
                 $inc=0
                 $Output=for ($inc = 0; $inc -lt $Output.Length + 1; $inc++)
                 {  
-                    if ($inc -eq $cPos) {
+                    if ($inc -eq $cPos - $LZero) {
                         $key.KeyChar
                     }
                     if ($Output[$inc]) {
@@ -49,20 +50,20 @@ param (
                 [console]::SetCursorPosition($cuPosL + 1,$cuPosT)
                 break
             }
-            {$key.key -eq "LeftArrow" -and $cuPosL -gt 0} { #Move Cursor left
+            {$key.key -eq "LeftArrow" -and $cuPosL -gt $LZero} { #Move Cursor left
                 [console]::SetCursorPosition($cuPosL - 1,$cuPosT)
                 break
             }
-            {$key.key -eq "RightArrow" -and $cuPosL -lt $Output.Length} { #Mpve Cursor Right
+            {$key.key -eq "RightArrow" -and $cuPosL -lt ($Output.Length + $LZero)} { #Mpve Cursor Right
                 [console]::SetCursorPosition($cuPosL + 1,$cuPosT)
                 break
             }
-            {$key.key -eq "Backspace" -and $cPos -gt 0} { #Backspace Erase
-                [console]::SetCursorPosition(0,$cuPosT) #clear old word
+            {$key.key -eq "Backspace" -and $cPos -gt $LZero} { #Backspace Erase
+                [console]::SetCursorPosition($LZero,$cuPosT) #clear old word
                 (0..($Output.Length)).ForEach({write-host " " -NoNewline})
                 $inc=0
                 [char[]]$Output=$Output.ForEach({
-                    if (-not ($inc -eq $cPos -1)) {
+                    if (-not ($inc -eq $cPos - 1 - $LZero)) {
                         $PSItem
                     }
                     $inc++
@@ -72,11 +73,11 @@ param (
                 break
             }
             {$key.key -eq "Delete" -and $Output.Length -gt 0} { #Delete Erase
-                [console]::SetCursorPosition(0,$cuPosT) #clear old word
+                [console]::SetCursorPosition($LZero,$cuPosT) #clear old word
                 (0..($Output.Length)).ForEach({write-host " " -NoNewline})
                 $inc=0
                 [char[]]$Output=$Output.ForEach({
-                    if (-not ($inc -eq $cPos)) {
+                    if (-not ($inc -eq $cPos - $LZero)) {
                         $PSItem
                     }
                     $inc++
@@ -89,7 +90,7 @@ param (
                 $editMode=$false
                 #write-host ""
                 #write-host ($Output -join "") -ForegroundColor Cyan
-                [console]::SetCursorPosition(0,$cuPosT)
+                [console]::SetCursorPosition($LZero,$cuPosT)
                 Write-Output ([string]$($Output -join "")).Trim()
                 break
             }
