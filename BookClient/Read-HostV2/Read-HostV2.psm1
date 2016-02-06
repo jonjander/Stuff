@@ -9,7 +9,7 @@
 
 function read-HostV2 {
 param (
-    [char[]]$StartText="abcd"
+    [char[]]$StartText=""
 
 )
     $LZero=[console]::CursorLeft
