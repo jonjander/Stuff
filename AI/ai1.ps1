@@ -66,11 +66,27 @@ param($p1,$p2,$xrate)
     Write-Output $k2
 } 
 
+function gComp {
+param([float]$ref,[float]$org)
+    if ($ref.ToString().length -eq $org.ToString().length) {
+        $tref=$ref -split ""
+        $igComp=0
+        $nFr=($org -split "").ForEach({
+            compare -ReferenceObject $tref[$igComp] -DifferenceObject $PSItem
+            $igComp++
+        }).where({$PSItem.SideIndicator -eq "=>"}).count
+
+        return (($ref.ToString().length) - $nFr)/($ref.ToString().length)*100
+    } else {
+        return 10 #Force to 10 #Expremental
+    }
+}
+
 function getFitness {
 param([string[]]$gene,[float]$goal)
     $rc=$gene -split "(\w{4})" | ? {$_}
     $calc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
-    try { Invoke-Expression $calc } catch { $r=0 }
+    try { Invoke-Expression $calc -ErrorAction SilentlyContinue } catch { $r=0 }
     try {
         if ($r.ToString() -eq "¤¤¤") {
             $r=0
@@ -78,18 +94,44 @@ param([string[]]$gene,[float]$goal)
     } catch {
         $r=0
     }
+    #write-host $r
+    
     $ggsa=$goal-$r
     [float]$fit=($ggsa/$goal)*100
     if ($fit -lt 0) {$fit=-($fit)}
     if ((100-$fit) -lt 0) {[float]$fit=99}
     $ru=(100-$fit)
+    #write-host $ru
     if ($ru -eq 0) {$ru=1}
-    if ($ru -eq 100) { #substract penalty for using *0 or +0 ops
-        $tmpScount=($calc -split "(([^\d]0\*)|(\*0)|(\+0)|([^\d]0\+))|(\/1[^\d])|(\/1$)|([^\d]\+\d)|(\*1[^\d])|(\*1$)" | ? {$_}).count
-        if ($tmpScount -gt 1) {
-            $ru -= ($tmpScount * 0.0001)
+    $gCompR=gComp -ref $goal -org $r
+    #write-host $gCompR -f Cyan
+
+    $BlendOptions=@("0","1","2")
+    $blendR=Get-Random $BlendOptions #Random fitnessblend
+    if ($gCompR -ne -1) {
+        if ($BlendOptions -eq "1") { #mix
+            $ru=($ru+$gCompR)/2
+        } elseif ($BlendOptions -eq "2") { #Use right
+            $ru=$gCompR
+        } else { #Use left
+            #$ru=$ru
         }
     }
+    #write-host $ru
+    #if ($ru -eq 100) { #substract penalty for using *0 or +0 ops
+        $tmpScount=($calc -split "(([^\d]0\*)|(\*0)|(\+0)|([^\d]0\+))|(\/1[^\d])|(\/1$)|([^\d]\+\d)|(\*1[^\d])|(\*1$)|([\+\-])\1" | ? {$_}).count
+        if ($tmpScount -gt 1) {
+            $ru -= ($tmpScount * 0.0001) 
+        }
+        $tmpeScount=0
+        $tmpeScount=($calc -split "[\+\-\*\\\%]" | ? {$_}).count
+        $ru += ($tmpeScount*0.0001) #Add bonus for using operators
+    #}
+
+    $e=[math]::E
+    $po=[math]::Pow($e,-(($ru/10)-5))
+    $ru=(1/(1+$po*7))*100
+
     return $ru
 }
 
@@ -146,12 +188,12 @@ param ($pop,$goal)
     return $newPop
 }
 
-$goal=1337
+$goal=36
 
-$spopSize=1000 #initial population size
+$spopSize=600 #initial population size
 $popSize=600 #Population size
-$nGenes=(4*20) #each character requires four genes
-$mrate=4 #Mutation rate
+$nGenes=(4*3) #each character requires four genes #defailt 20
+$mrate=14 #Mutation rate
 $xrate=800 #Crossover rate
 
 Write-Host ("Goal is : {0}" -f $goal)
@@ -160,10 +202,14 @@ Write-Host ("Popilation Size : {0}" -f $popSize)
 Write-Host ("Number of genes in chromosome : {0}" -f $nGenes)
 write-host ("Mutation rate : ({0}/100000)" -f $mrate)
 write-host ("Crossover rate : {0}%" -f ($xrate/1000))
+
+
 $pop=getFirstPopulation -size $spopSize -nGenes $nGenes
 $best=$null
 $CGen=0
-while ($best.Fitness -ne 100) {
+$r=$null #clear result
+$timeLine=while ($r -ne $goal) {
+    $robj=New-Object System.Object
     $CGen++
     $newPop=CalcFitness -pop $pop -goal $goal
     write-host "Top 4 best chromosomes"
@@ -171,10 +217,15 @@ while ($best.Fitness -ne 100) {
     $best=$newPop | sort -Property Fitness -Descending | select -First 1
     $rc=$best.DNA -split "(\w{4})" | ? {$_}
     $tcalc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
-    Write-host ("Current generation : {0}" -f $CGen)
+    Write-host ("Current generation : {0}" -f $CGen) -f cyan
     Write-Host ("Popilation size : {0}" -f ($newPop).count)
-    Write-Host ("Calculation result : {0}" -f $tcalc)
-    Write-Host ("Current best fitness : {0}" -f $best.Fitness)
+    Write-Host ("Calculation formula : {0}" -f $tcalc)
+    try {Invoke-Expression -Command $tcalc } catch { $r = "Error" }
+    write-host ("Calculation result : {0}" -f $r)
+    Write-Host ("Current best fitness : {0}" -f $best.Fitness) -f magenta
+    $robj | Add-Member -MemberType NoteProperty -Name Fitness -Value $best.Fitness
+    $robj | Add-Member -MemberType NoteProperty -Name Formulat -Value $tcalc
+    $robj | Add-Member -MemberType NoteProperty -Name Time -Value (get-date)
     Write-Host ("Mutation rate {0}" -f $mrate)
     [string[]]$pop=($newPop | sort -Property Fitness -Descending | select -First (get-random -Minimum 0 -Maximum 20)).DNA #surving 
     $tmpResize=(get-random -Minimum 0 -Maximum 20)
@@ -188,4 +239,6 @@ while ($best.Fitness -ne 100) {
     }
     until ($pop.Count -ge ($popSize + $tmpResize))
     write-progress -id 2 -Completed -Activity "Generating new popilation"
+    Write-Output $robj
 }
+$timeLine | ogv
