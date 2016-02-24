@@ -204,9 +204,9 @@ param ($pop,$goal)
     return $newPop
 }
 
-$goal=8801156673
+$goal=1337
 
-$spopSize=1500 #initial population size
+$spopSize=1000 #initial population size
 $popSize=800 #Population size
 $nGenes=(4*20) #each character requires four genes #defailt 20
 $mrate=14 #Mutation rate
@@ -255,6 +255,7 @@ $timeLine=while ($r -ne $goal) {
     #inbreeding detect
     [int]$CloneChilds=($pop | sort).count - ($pop | sort | Get-Unique).count
     if ($CloneChilds -gt 2) { #Increase mutation
+        write-host "Warning inbreeding! Increasing mutation" -f yellow
         $Script:mrate += [math]::Floor($CloneChilds / 2)
     } elseif ($CloneChilds -lt 2 -and $mrate -gt 14) { #Decrease mutation
         $Script:mrate = [math]::Floor($mrate / 2)
