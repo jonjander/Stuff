@@ -85,14 +85,27 @@ param([float]$ref,[float]$org)
 function getFitness {
 param([string[]]$gene,[float]$goal)
     $rc=$gene -split "(\w{4})" | ? {$_}
-    $calc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
-    try { Invoke-Expression $calc -ErrorAction SilentlyContinue } catch { $r=0 }
-    try {
-        if ($r.ToString() -eq "¤¤¤") {
-            $r=0
-        }
-    } catch {
+    [string]$tmpFormula=$rc.ForEach({$options["$psitem"]}) -join ""
+    $calc="`$r=", $tmpFormula -join ""
+
+    if (($tmpFormula -split ("([*/%X]{2,})|(^[*/%X])|([*/%X]$)|(X)")).count -gt 1) { #Calculation error avoidance
         $r=0
+        write-host "Error avoided " -ForegroundColor Green -NoNewline
+        write-host $calc
+    } else {
+
+        try { Invoke-Expression $calc -ErrorAction SilentlyContinue } catch { $r=0 }
+        try {
+            if ($r.ToString() -eq "¤¤¤") {
+                $r=0
+                write-host "inf " -ForegroundColor Red -NoNewline
+                write-host $calc
+            }
+        } catch {
+            $r=0
+            write-host "Error " -ForegroundColor Red -NoNewline
+            write-host $calc
+        }
     }
     #write-host $r
     
@@ -106,15 +119,18 @@ param([string[]]$gene,[float]$goal)
     $gCompR=gComp -ref $goal -org $r
     #write-host $gCompR -f Cyan
 
-    $BlendOptions=@("0","1","2")
+    [string[]]$BlendOptions=@("0","1","2")
     $blendR=Get-Random $BlendOptions #Random fitnessblend
     if ($gCompR -ne -1) {
-        if ($BlendOptions -eq "1") { #mix
+        if ($blendR -eq "1") { #mix
             $ru=($ru+$gCompR)/2
-        } elseif ($BlendOptions -eq "2") { #Use right
+            #Write-Host "avg mix" -ForegroundColor Yellow
+        } elseif ($blendR -eq "2") { #Use right
             $ru=$gCompR
+            #Write-Host "By position" -ForegroundColor Yellow
         } else { #Use left
             #$ru=$ru
+            #Write-Host "By math" -ForegroundColor Yellow
         }
     }
     #write-host $ru
@@ -142,7 +158,7 @@ param ($newPop,$xrate)
     do
     {
         $timeout++
-        if ($timeout -gt 4) {
+        if ($timeout -gt 3) {
             $script:mrate++
         }
         #Parent 1
@@ -168,7 +184,7 @@ param ($newPop,$xrate)
             }
         }) | select -First 1
         }    
-    until ($p2.DNA -ne $p1.DNA -or $timeout -gt 5)
+    until ($p2.DNA -ne $p1.DNA -or $timeout -gt 4)
     return crossover -p1 $p1.DNA -p2 $p2.DNA -xrate $xrate
 }
 
@@ -178,7 +194,7 @@ param ($pop,$goal)
     $popi=0
     $newPop=$pop.ForEach({
         $popi++
-        write-progress -id  1 -activity "Calc fitness" -status 'Progress' -percentcomplete (($popi/$popt)*100)
+        write-progress -id  1 -activity "Calc fitness" -status "Progressing $PSItem" -percentcomplete (($popi/$popt)*100)
         $r=New-Object System.Object
         $r | Add-Member -MemberType NoteProperty -Name DNA -Value $PSItem
         $r | Add-Member -MemberType NoteProperty -Name Fitness -Value (getFitness -gene $PSItem -goal $goal)
@@ -188,11 +204,11 @@ param ($pop,$goal)
     return $newPop
 }
 
-$goal=36
+$goal=8801156673
 
-$spopSize=600 #initial population size
-$popSize=600 #Population size
-$nGenes=(4*3) #each character requires four genes #defailt 20
+$spopSize=1500 #initial population size
+$popSize=800 #Population size
+$nGenes=(4*20) #each character requires four genes #defailt 20
 $mrate=14 #Mutation rate
 $xrate=800 #Crossover rate
 
@@ -202,7 +218,6 @@ Write-Host ("Popilation Size : {0}" -f $popSize)
 Write-Host ("Number of genes in chromosome : {0}" -f $nGenes)
 write-host ("Mutation rate : ({0}/100000)" -f $mrate)
 write-host ("Crossover rate : {0}%" -f ($xrate/1000))
-
 
 $pop=getFirstPopulation -size $spopSize -nGenes $nGenes
 $best=$null
