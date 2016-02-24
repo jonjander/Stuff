@@ -119,7 +119,7 @@ param([string[]]$gene,[float]$goal)
     $gCompR=gComp -ref $goal -org $r
     #write-host $gCompR -f Cyan
 
-    [string[]]$BlendOptions=@("0","1","2")
+    [string[]]$BlendOptions=@("0","1","2") #"0","1","2"
     $blendR=Get-Random $BlendOptions #Random fitnessblend
     if ($gCompR -ne -1) {
         if ($blendR -eq "1") { #mix
@@ -204,11 +204,11 @@ param ($pop,$goal)
     return $newPop
 }
 
-$goal=1337
+$goal=12
 
-$spopSize=1000 #initial population size
-$popSize=800 #Population size
-$nGenes=(4*20) #each character requires four genes #defailt 20
+$spopSize=300 #initial population size
+$popSize=10 #Population size
+$nGenes=(4*12) #each character requires four genes #defailt 20
 $mrate=14 #Mutation rate
 $xrate=800 #Crossover rate
 
@@ -236,7 +236,7 @@ $timeLine=while ($r -ne $goal) {
     Write-Host ("Popilation size : {0}" -f ($newPop).count)
     Write-Host ("Calculation formula : {0}" -f $tcalc)
     try {Invoke-Expression -Command $tcalc } catch { $r = "Error" }
-    write-host ("Calculation result : {0}" -f $r)
+    write-host ("Calculation result : {0}" -f $r) -ForegroundColor Green
     Write-Host ("Current best fitness : {0}" -f $best.Fitness) -f magenta
     $robj | Add-Member -MemberType NoteProperty -Name Fitness -Value $best.Fitness
     $robj | Add-Member -MemberType NoteProperty -Name Formulat -Value $tcalc
