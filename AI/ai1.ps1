@@ -252,7 +252,7 @@ $timeLine=while ($r -ne $goal) {
         $pop+=$Childs
     }
     until ($pop.Count -ge ($popSize + $tmpResize))
-    #Get CloneChilds
+    #inbreeding detect
     [int]$CloneChilds=($pop | sort).count - ($pop | sort | Get-Unique).count
     if ($CloneChilds -gt 2) { #Increase mutation
         $Script:mrate += [math]::Floor($CloneChilds / 2)
