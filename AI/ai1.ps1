@@ -250,9 +250,17 @@ $timeLine=while ($r -ne $goal) {
         $Childs=mate -newPop $newPop -xrate $xrate
         $Childs=$Childs.ForEach({Mutate -gene $PSItem -mRate $mrate})
         $pop+=$Childs
-        $pop = $pop | sort | Get-Unique
     }
     until ($pop.Count -ge ($popSize + $tmpResize))
+    #Get CloneChilds
+    [int]$CloneChilds=($pop | sort).count - ($pop | sort | Get-Unique).count
+    if ($CloneChilds -gt 2) { #Increase mutation
+        $Script:mrate += [math]::Floor($CloneChilds / 2)
+    } elseif ($CloneChilds -lt 2 -and $mrate -gt 14) { #Decrease mutation
+        $Script:mrate = [math]::Floor($mrate / 2)
+    }
+    $pop = $pop | sort | Get-Unique #Clean Clones
+
     write-progress -id 2 -Completed -Activity "Generating new popilation"
     Write-Output $robj
 }
