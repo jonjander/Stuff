@@ -134,15 +134,15 @@ param([string[]]$gene,[float]$goal)
         }
     }
     #write-host $ru
-    #if ($ru -eq 100) { #substract penalty for using *0 or +0 ops
-        $tmpScount=($calc -split "(([^\d]0\*)|(\*0)|(\+0)|([^\d]0\+))|(\/1[^\d])|(\/1$)|([^\d]\+\d)|(\*1[^\d])|(\*1$)|([\+\-])\1" | ? {$_}).count
+    if ($ru -gt 25) { #substract penalty for using *0 or +0 ops
+        $tmpScount=($calc -split "(([^\d]0\*)|(\*0)|(\+0)|([^\d]0\+))|(\/1[^\d])|(\/1$)|([^\d]\+\d)|(\*1[^\d])|(\*1$)|([\+\-])\1|($goal)" | ? {$_}).count
         if ($tmpScount -gt 1) {
-            $ru -= ($tmpScount * 0.0001) 
+            $ru -= ($tmpScount * 0.5) 
         }
         $tmpeScount=0
         $tmpeScount=($calc -split "[\+\-\*\\\%]" | ? {$_}).count
-        $ru += ($tmpeScount*0.0001) #Add bonus for using operators
-    #}
+        $ru += ($tmpeScount*0.5) #Add bonus for using operators
+    }
 
     $e=[math]::E
     $po=[math]::Pow($e,-(($ru/10)-5))
@@ -204,11 +204,11 @@ param ($pop,$goal)
     return $newPop
 }
 
-$goal=12
+$goal=198808056652
 
-$spopSize=300 #initial population size
-$popSize=10 #Population size
-$nGenes=(4*12) #each character requires four genes #defailt 20
+$spopSize=5000 #initial population size
+$popSize=1500 #Population size
+$nGenes=(4*20) #each character requires four genes #defailt 20
 $mrate=14 #Mutation rate
 $xrate=800 #Crossover rate
 
@@ -224,6 +224,12 @@ $best=$null
 $CGen=0
 $r=$null #clear result
 $timeLine=while ($r -ne $goal) {
+    if ($mrate -gt 300 -or (($CGen%50) -eq 0)) {
+        $script:popSize += [math]::Floor($popSize * 0.20)
+        #$script:nGenes += 4
+        #$pop+=getFirstPopulation -size $spopSize -nGenes $nGenes
+    }
+
     $robj=New-Object System.Object
     $CGen++
     $newPop=CalcFitness -pop $pop -goal $goal
