@@ -204,10 +204,10 @@ param ($pop,$goal)
     return $newPop
 }
 
-$goal=198808056652
+$goal=42
 
-$spopSize=5000 #initial population size
-$popSize=1500 #Population size
+$spopSize=50 #initial population size
+$popSize=20 #Population size
 $nGenes=(4*20) #each character requires four genes #defailt 20
 $mrate=14 #Mutation rate
 $xrate=800 #Crossover rate
