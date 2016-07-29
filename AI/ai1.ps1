@@ -3,19 +3,19 @@ $options=@{
     "0000"="0"
     "0001"="1"
     "0010"="2"
-    "0011"="3"
+    "0011"="0" #3
     "0100"="4"
     "0101"="5"
     "0110"="6"
-    "0111"="7"
+    "0111"="0" #7
     "1000"="8"
     "1001"="9"
     "1010"="+"
     "1011"="-"
     "1100"="*"
     "1101"="/"
-    "1110"="%"
-    "1111"="X"
+    "1110"="0" #%
+    "1111"="0"
 }
 
 function getFirstPopulation {
@@ -204,10 +204,10 @@ param ($pop,$goal)
     return $newPop
 }
 
-$goal=42
+$goal=1337
 
-$spopSize=50 #initial population size
-$popSize=20 #Population size
+$spopSize=1000 #initial population size
+$popSize=10 #Population size
 $nGenes=(4*20) #each character requires four genes #defailt 20
 $mrate=14 #Mutation rate
 $xrate=800 #Crossover rate
@@ -248,7 +248,8 @@ $timeLine=while ($r -ne $goal) {
     $robj | Add-Member -MemberType NoteProperty -Name Formulat -Value $tcalc
     $robj | Add-Member -MemberType NoteProperty -Name Time -Value (get-date)
     Write-Host ("Mutation rate {0}" -f $mrate)
-    [string[]]$pop=($newPop | sort -Property Fitness -Descending | select -First (get-random -Minimum 0 -Maximum 20)).DNA #surving 
+    [string[]]$pop=($newPop.Where({$psitem.Fitness -gt 10}) | sort -Property Fitness -Descending | select -First (get-random -Minimum 2 -Maximum $newPop.Count)).DNA #surving 
+    write-host ("Surving creatures : {0}" -f $pop.Count ) -ForegroundColor Green
     $tmpResize=(get-random -Minimum 0 -Maximum 20)
     do
     { 
