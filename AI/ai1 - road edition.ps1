@@ -255,7 +255,11 @@ class map {
         $LastTrack = $this.tracks[$this.tracks.Length - 1]
         $firstTrack = $this.tracks[0]
 
-        $Delta = ($LastTrack.End.x - $firstTrack.Start.x) - ($LastTrack.End.y - $firstTrack.Start.y)
+        $xDiff = [math]::Sqrt([math]::pow($LastTrack.End.x - $firstTrack.Start.x,2))
+        $yDiff = [math]::Sqrt([math]::pow($LastTrack.End.y - $firstTrack.Start.y,2))
+
+        $Delta = $yDiff + $xDiff 
+        #$Delta = ($LastTrack.End.x - $firstTrack.Start.x) - ($LastTrack.End.y - $firstTrack.Start.y)
 
         return $Delta
     }
@@ -264,9 +268,26 @@ class map {
         $LastTrack = $this.tracks[$this.tracks.Length - 1]
         $firstTrack = $this.tracks[0]
 
-        $Delta = ($LastTrack.End.x - $firstTrack.Start.x) - ($LastTrack.End.y - $firstTrack.Start.y)
-        if ($Delta -eq 0 -and (($LastTrack.end.dir + 2) % 4) -eq $firstTrack.Start.dir -and $this.tracks.Count -gt 1) {
-            return $true
+        $xDiff = [math]::Sqrt([math]::pow($LastTrack.End.x - $firstTrack.Start.x,2))
+        $yDiff = [math]::Sqrt([math]::pow($LastTrack.End.y - $firstTrack.Start.y,2))
+        $sameX=$false
+        $sameY=$false
+        if ($LastTrack.End.x -eq $firstTrack.Start.x) {
+            $sameX=$true
+        }
+        if ($LastTrack.End.y -eq $firstTrack.Start.y) {
+            $sameY=$true
+        }
+        
+
+        $Delta = $yDiff + $xDiff 
+        #if ($Delta -le 1 -and ((($LastTrack.end.dir + 2) % 4) -eq $firstTrack.Start.dir) -and $this.tracks.Count -gt 1) {
+        if ($Delta -eq 0 -and ($LastTrack.end.dir -eq $firstTrack.Start.dir) -and $this.tracks.Count -gt 1) {
+            if (($sameY -and $LastTrack.end.dir -in @(3,1)) -or ($sameX -and $LastTrack.end.dir -in @(0,2))) {
+                return $true
+            } else {
+                return $false
+            }
         } else { 
             return $false
         }
@@ -315,11 +336,64 @@ $trackTemplates = @{
     
         0
     )
-    "0100"=""
-    "0101"=""
-    "0110"=""
-    "0111"="" #7
-    "1000"=""
+    "0100"=@( #S curve left
+        0,0,0,1
+        0,1,0,0
+        -1,1,0,0
+        -1,2,0,0
+    
+        0,0,0,0
+        -1,3,0,1
+    
+        0
+    )
+    "0101"=@( #Big right
+        0,0,0,1
+        0,1,0,0
+        1,1,0,0
+        1,2,0,0
+        2,2,0,0
+    
+        0,0,0,0
+        3,2,1,1
+    
+        0
+    )
+    "0110"=@( #Big left
+        0,0,0,1
+        0,1,0,0
+        -1,1,0,0
+        -1,2,0,0
+        -2,2,0,0
+    
+        0,0,0,0
+        -3,2,3,1
+    
+        0
+    )
+    "0111"=@( #S curve right
+        0,0,0,1
+        0,1,0,0
+        1,1,0,0
+        1,2,0,0
+    
+        0,0,0,0
+        1,3,0,1
+    
+        0
+    ) 
+    "1000"=@( #U turn right
+        0,0,0,1
+        0,1,0,0
+        -1,1,0,0
+        -2,1,0,0
+        -2,0,0,0
+
+        0,0,0,0
+        -2,-1,2,1
+    
+        0
+    ) 
     "1001"=""
     "1010"=""
     "1011"=""
@@ -329,11 +403,16 @@ $trackTemplates = @{
     "1111"=""
 }
 
+#$gene = "00000000000001110000101"
 
-$gene = "000000010011001100011111"
+
+#$map=getFitness -gene "0000000000011001101111110110111101101010001110010110110100010001100100010" -outObj
 
 function getFitness {
-param ($gene)
+param ($gene,
+[switch]$outObj,
+$targetTracks
+)
     #Create genebank
     [string[]]$geneSeq=$gene -split "(\w{4})" | ? {$_}
     
@@ -345,22 +424,48 @@ param ($gene)
     
     try {
         $geneSeq.ForEach({
-            if ($trackTemplates[$psitem] -eq "") {next}
-            $TmpTrack=[track]::new($trackTemplates[$psitem])
-            if ($TMPmap.BuildTrack($TmpTrack) -eq $false) {
-                $Fitness=0
-                next
+            if ($trackTemplates[$PSItem] -ne "") {
+                $TmpTrack=[track]::new($trackTemplates[$PSItem])
+                if ($TMPmap.BuildTrack($TmpTrack) -eq $false) {
+                    $Fitness=0
+                    throw
+                }
+                $Fitness+=6
             }
-            $Fitness+=1
         })
-    } catch { }
-    if ($TMPmap.getDelta() -gt 20) {$Fitness -= 20 + $map.getDelta() }
-    if ($TMPmap.getDelta() -lt 20) {$Fitness += 20 - $map.getDelta() }
-    if ($TMPmap.testLoop() -eq $true) {$Fitness += 200}
+    } catch { $Fitness-=14 }
 
-    return $Fitness
+
+    $xMaxMin=($TMPmap.tracks.shape.x) | measure -Maximum -Minimum
+    $yMaxMin=($TMPmap.tracks.shape.y) | measure -Maximum -Minimum
+
+    #Big aria bonus
+    $Fitness+=(($xMaxMin.Maximum - $xMaxMin.Minimum) + ($yMaxMin.Maximum - $yMaxMin.Minimum))*3
+
+    #shape count bonus
+    $fitness+=$TMPmap.tracks.shape.count*1.5
+
+    #$targetTracks = 14 # move to parameter
+    $trackDiff = $targetTracks - (($TMPmap.tracks.Count + $TMPmap.tracks.shape.Count) / 2)
+    $trackDiff = [math]::Sqrt([math]::Pow($trackDiff,2)) #Normalize
+
+    $Fitness-=$trackDiff
+    if ((($TMPmap.tracks.Count + $TMPmap.tracks.shape.Count) / 2) -lt ($targetTracks/2)) { $Fitness/=4 } #
+
+    if ($TMPmap.getDelta() -gt 20) { $Fitness -= 20 + $TMPmap.getDelta() }
+    if ($TMPmap.getDelta() -lt 20) { 
+        $Fitness += (20 - $TMPmap.getDelta()) * (20 - $TMPmap.getDelta())
+        $Fitness += $TMPmap.tracks.Count
+        }
+    if ($TMPmap.testLoop() -eq $true) {$Fitness += 1000}
+
+    ##diff rightleft turns
+    if ($outObj) {
+        return $TMPmap
+    } else {
+        return $Fitness
+    }
 }
-
 
 #GetFitness -gene $gene
 
@@ -382,114 +487,6 @@ param ($gene)
 #        
         
         
-        
-       # break
-#$newRandomTrack = Invoke-Command $test1
-
-
-#$newRandomTrack = Invoke-Expression $trackTemplates[(get-random ([string[]]$($trackTemplates.Keys)))] 
-
-
-
-
-#$newRandomTrack = Invoke-Expression $trackTemplates[(get-random ([string[]]$($trackTemplates.Keys)))] 
-#$map.BuildTrack($newRandomTrack)
-#
-#$newRandomTrack = Invoke-Expression $trackTemplates[(get-random ([string[]]$($trackTemplates.Keys)))] 
-#$map.BuildTrack($newRandomTrack)
-#
-#$newRandomTrack = Invoke-Expression $trackTemplates[(get-random ([string[]]$($trackTemplates.Keys)))] 
-#$map.BuildTrack($newRandomTrack)
-#
-#$newRandomTrack = Invoke-Expression $trackTemplates[(get-random ([string[]]$($trackTemplates.Keys)))] 
-#$map.BuildTrack($newRandomTrack)
-#
-#$newRandomTrack = Invoke-Expression $trackTemplates[(get-random ([string[]]$($trackTemplates.Keys)))] 
-#$map.BuildTrack($newRandomTrack)
-
-#
-#
-#Remove-Variable t1
-#Remove-Variable t2
-
-#$T1=[track]::new()
-#$endDir=$T1.End.dir
-#
-#$T2=[track]::new()
-#$t2.setRotation($T1.End.dir)
-#$t2.en
-#
-#function testTracks {
-#param (
-#[track]$track1,
-#[track]$track2
-#)
-#    if ($track1.End.dir -eq $track2.Start.dir) { # Check track orentation
-#        write-host "track connections match"
-#    } else {
-#        write-host "error tracks dont connect"
-#    }
-#
-#}
-#
-#testTracks -track1 $T1 -track2 $T2
-#
-##$T1.Start
-#
-#$endDir + 4 % 4
-#$starDir
-#
-#
-#$T1.SetRotation(1)
-##$T1.shape
-#
-#$T2=[track]::new()
-#
-#$T3=[track]::new()
-#
-#
-#
-#
-#
-#$t1.end
-#$T2.Start
-#
-#testTracks -track1 $T1 -track2 $t2
-#testTracks -track1 $T2 -track2 $t3
-#
-#
-#
-#
-#break
-#
-#$katt = [MAP]::new()
-#$katt.setStartPoint()
-#
-#
-#$katt.mapCells.Count
-#Clear-Variable -Name katt
-#Remove-Variable -Name katt
-#
-
-
-#$options=@{
-#    "0000"="0"
-#    "0001"="1"
-#    "0010"="2"
-#    "0011"="0" #3
-#    "0100"="4"
-#    "0101"="5"
-#    "0110"="6"
-#    "0111"="0" #7
-#    "1000"="8"
-#    "1001"="9"
-#    "1010"="+"
-#    "1011"="-"
-#    "1100"="*"
-#    "1101"="/"
-#    "1110"="0" #%
-#    "1111"="0"
-#}
 
 function getFirstPopulation {
 param ($size,$nGenes)
@@ -670,19 +667,20 @@ param ($pop,$goal)
         write-progress -id  1 -activity "Calc fitness" -status "Progressing $PSItem" -percentcomplete (($popi/$popt)*100)
         $r=New-Object System.Object
         $r | Add-Member -MemberType NoteProperty -Name DNA -Value $PSItem
-        $r | Add-Member -MemberType NoteProperty -Name Fitness -Value (getFitness -gene $PSItem -goal $goal)
+        $r | Add-Member -MemberType NoteProperty -Name Fitness -Value (getFitness -gene $PSItem -targetTracks $targetTracks)
         return $r
     })
     write-progress -id  1 -Completed -Activity "Calc fitness"
     return $newPop
 }
 
-
-$spopSize=100 #initial population size
-$popSize=10 #Population size
-$nGenes=(4*20) #each character requires four genes #defailt 20
+$spopSize=30 #initial population size
+$popSize=20 #Population size
+$targetTracks=40 #avg trackparts + Trackcells
+$nGenes=(4*$targetTracks) #each character requires four genes #defailt 20
 $mrate=14 #Mutation rate
 $xrate=800 #Crossover rate
+$complexitivity=500 # 0 - 700 , 400 simple 
 
 Write-Host ("Goal is : {0}" -f $goal)
 Write-Host ("Generate fist popilation : {0}" -f $spopSize)
@@ -695,26 +693,28 @@ $pop=getFirstPopulation -size $spopSize -nGenes $nGenes
 $best=$null
 $CGen=0
 $r=$null #clear result
-$timeLine=while ($best.Fitness -lt 100) {
-    if ($mrate -gt 300 -or (($CGen%50) -eq 0)) {
+[object[]]$timeLine = $null
+
+$timeLine+=while ($best.Fitness -lt 1000 + $complexitivity) {
+    if ($mrate -gt 50 -or (($CGen%5) -eq 0)) {
         $script:popSize += [math]::Floor($popSize * 0.20)
-        #$script:nGenes += 4
-        #$pop+=getFirstPopulation -size $spopSize -nGenes $nGenes
+        $script:nGenes += 4*1
+        $pop+=getFirstPopulation -size $spopSize -nGenes $nGenes
     }
 
     $robj=New-Object System.Object
     $CGen++
     $newPop=CalcFitness -pop $pop -goal $goal
     write-host "Top 4 best chromosomes"
-    write-host (($newPop.DNA | sort -Descending |select -First 4)  -join "`n")
+    write-host (($newPop | sort -Descending -Property Fitness | select -First 4).DNA  -join "`n")
     $best=$newPop | sort -Property Fitness -Descending | select -First 1
     $rc=$best.DNA -split "(\w{4})" | ? {$_}
     #$tcalc="`$r=", ($rc.ForEach({$options["$psitem"]}) -join "") -join ""
     Write-host ("Current generation : {0}" -f $CGen) -f cyan
     Write-Host ("Popilation size : {0}" -f ($newPop).count)
-    Write-Host ("Calculation formula : {0}" -f $tcalc)
+    #Write-Host ("Calculation formula : {0}" -f $tcalc)
     #try {Invoke-Expression -Command $tcalc } catch { $r = "Error" }
-    write-host ("Calculation result : {0}" -f $r) -ForegroundColor Green
+    #write-host ("Calculation result : {0}" -f $r) -ForegroundColor Green
     Write-Host ("Current best fitness : {0}" -f $best.Fitness) -f magenta
     $robj | Add-Member -MemberType NoteProperty -Name Fitness -Value $best.Fitness
     $robj | Add-Member -MemberType NoteProperty -Name Formulat -Value $tcalc
@@ -725,7 +725,9 @@ $timeLine=while ($best.Fitness -lt 100) {
     $tmpResize=(get-random -Minimum 0 -Maximum 20)
     do
     { 
-        write-progress -id  2 -activity "Generating new popilation" -status 'Progress' -percentcomplete (($pop.Count/($popSize + $tmpResize))*100)
+        try {
+            write-progress -id  2 -activity "Generating new popilation" -status 'Progress' -percentcomplete (($pop.Count/($popSize + $tmpResize))*100)
+        } catch {}
         $Childs=mate -newPop $newPop -xrate $xrate
         $Childs=$Childs.ForEach({Mutate -gene $PSItem -mRate $mrate})
         $pop+=$Childs
@@ -744,4 +746,16 @@ $timeLine=while ($best.Fitness -lt 100) {
     write-progress -id 2 -Completed -Activity "Generating new popilation"
     Write-Output $robj
 }
+
 $timeLine | ogv
+
+
+(getFitness -targetTracks $targetTracks -gene $best.dna -outObj).testLoop()
+$bestTrackObj = (getFitness -targetTracks $targetTracks -gene $best.dna -outObj)
+$bestTrackObj.tracks.shape | ogv
+
+
+#($newPop | sort -Descending -Property Fitness | select -First 4).DNA.foreach({
+#    $btobj = (getFitness -targetTracks $targetTracks -gene $psitem -outObj)
+#    $btobj.tracks.shape | ogv
+#})
