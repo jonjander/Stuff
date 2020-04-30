@@ -19,7 +19,7 @@ function write-c {
         { 
             [console]::setcursorposition($x,$y) #$offY+
             write-host ("{0}" -f [char]$(get-random -Minimum 32 -Maximum 122)) -ForegroundColor $wrColor -NoNewline
-            sleep -Milliseconds 2
+     
         }
         [console]::setcursorposition($x,$y)
         write-host ("{0}" -f [char]$($Word[$i])) -ForegroundColor $Color -NoNewline
@@ -71,22 +71,18 @@ if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
 [console]::setcursorposition($left,$wt)
 write-host "o" -ForegroundColor Red -NoNewline
 [console]::SetWindowPosition(0,$wt)
-sleep -Milliseconds 200
 
 [console]::setcursorposition($right,$wt)
 write-host "o" -ForegroundColor Red -NoNewline
 [console]::SetWindowPosition(0,$wt)
-sleep -Milliseconds 200
 
 [console]::setcursorposition($right,$bottom)
 write-host "o" -ForegroundColor Red -NoNewline
 [console]::SetWindowPosition(0,$wt)
-sleep -Milliseconds 200
 
 [console]::setcursorposition($left,$bottom)
 write-host "o" -ForegroundColor Red -NoNewline
 [console]::SetWindowPosition(0,$wt)
-sleep -Milliseconds 200
 
 [console]::SetWindowPosition(0,$wt)
 [console]::setcursorposition($logL,$logT)
@@ -96,7 +92,6 @@ if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
 [console]::setcursorposition($logL,$logT)
 write-c -word "Clear screen" -wrColor Red -Color Cyan
 if ($logi -lt ($bottom -5)) {$logi++} else {$logi=0} ; $logT=$top + 3 + $logi
-sleep -Milliseconds 200
 
 for ($x = $left; $x -lt ($right + 1); $x++)
 { 
@@ -108,10 +103,13 @@ for ($x = $left; $x -lt ($right + 1); $x++)
         } catch {}
     }
 }
-[console]::SetWindowPosition(0,$wt)
+try {
+    [console]::SetWindowPosition(0,$wt)
 
 $f="      ``/oooooooo+.                  ``    ````````````  ``  ````````````            ``````       `````````` ..:. :..`` /..  "
-[console]::setcursorposition($left + 3,$top + 3)
+
+    [console]::setcursorposition($left + 3,$top + 3)
+} catch {}
 if ($f.Length -gt $right) {  
     write-host "Merry Christmas Altitude365"
 } else {
@@ -125,7 +123,6 @@ write-host "/ooooooo+oo-``oo+oooooooo``  oh-.yy  .N.     :m    m/   -m``   m/   
 write-host ".oooooooooo-``oooooooooo:  /d/::/ho .N.     :m    m/   -m``   ys   ``d: ``m.   :h/ ``M``                   "
 write-host "  -:///////.``////////-``  ``s.    ``s.``soooo`` -s    s-   .o    ``/oo+o-  ``soo++:``  ``yooo+``               "
 }
-Sleep 8
 #for ($y = $top; $y -lt ($bottom + 1); $y++)
 #{ 
 #    for ($x = $left; $x -lt ($right + 1); $x++)
@@ -134,7 +131,9 @@ Sleep 8
 #        write-host " " -NoNewline
 #    }
 #}
-[console]::SetWindowPosition(0,$wt)
+try {
+    [console]::SetWindowPosition(0,$wt)
+} catch {}
 
 function createNewSnowflage {
     $randomStart=Get-Random -Minimum $left -Maximum $right
@@ -165,9 +164,10 @@ $snowflakes+=testFlage
 #$snowflakes+=testFlage
 #$snowflakes+=testFlage
 
-Sleep 4
 while (1) {
-[console]::SetWindowPosition(0,$wt)
+try {
+    [console]::SetWindowPosition(0,$wt)
+} catch {}
 $snowflakes+=testFlage
 #$snowflakes+=testFlage
 
@@ -181,7 +181,6 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         } #Slowdown random
     }).ForEach({
     if (-not $Debug) {
-        sleep -Milliseconds 10
     }
     $id=$psitem.id
     $oldx=$psitem.x
@@ -224,7 +223,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         write-host "x " $newx -BackgroundColor White -ForegroundColor Black
         Write-Host "y " $newy -BackgroundColor White -ForegroundColor Black
         write-host "Number of objects " $snowflakes.Count -BackgroundColor White -ForegroundColor Black
-        sleep -Milliseconds 50
+
     }
     ##Within boundarys
     if ($newx -lt $left) { # Left
@@ -257,7 +256,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                 $newy=$newy-1
                 #$newx=$newx
                 #Write-Host "MGL!!" $newy -ForegroundColor Green
-                #sleep 2
+ 
                 $rrr | Add-Member -MemberType NoteProperty -Name newy -Value $newy -Force
                 $rrr | Add-Member -MemberType NoteProperty -Name newx -Value $newx -Force
                 $rrr | Add-Member -MemberType NoteProperty -Name psitem -Value $psitem -Force
@@ -284,7 +283,6 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
         } else {
             #toplevel
             $down=$true
-            #if ($down -eq $true) {sleep 2;Write-Host "DOWN" -ForegroundColor Green}
             #[console]::setcursorposition($left,$top + 2)
             #write-host "TTLLLLLLLLLLLLLLLLLLLLLL" $newy (Get-Date) -BackgroundColor White -ForegroundColor Black
         }
@@ -316,7 +314,7 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             #write-host "Exit" $newy (Get-Date) -BackgroundColor White -ForegroundColor red
             #write-host "Exit" $down (Get-Date) -BackgroundColor White -ForegroundColor red
             #write-host "Exit" $psitem.Skin (Get-Date) -BackgroundColor White -ForegroundColor red
-            #sleep 1
+      
         #}
     }
 
@@ -358,7 +356,6 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
             write-host " "
         } catch {}
         if ($Debug) {
-            sleep -Milliseconds 200
             write-host "X" -NoNewline -ForegroundColor Red
         }
         $snowflakes=$snowflakes.Where({$PSItem.id -ne $id})
@@ -452,8 +449,10 @@ $snowflakes.where({$psitem.Stoped -eq $false}).where({
                     $snowflakes[$SFindex].y = $PSItem.y
                     $snowflakes[$SFindex].Stoped = $false
                     if ($Debug) {
-                        [console]::setcursorposition($PSItem.x,$PSItem.y)
-                        write-host "Z" -ForegroundColor Red
+                        try {
+                            [console]::setcursorposition($PSItem.x,$PSItem.y)
+                            write-host "Z" -ForegroundColor Red
+                        }catch {}
                     }
                 }
             })
