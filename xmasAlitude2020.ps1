@@ -223,3 +223,6 @@ public class Altitude365XmasSnowAnimator : {ctor}
 Add-Type -TypeDefinition ($programData.Replace("{ctor}", [char[]]$displayAdress -join ""))
 $p = [altitudeXmas2020]::new();
 $p.Main();
+while($true) {
+
+}
